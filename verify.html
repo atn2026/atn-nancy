@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATN — Vérification de carte</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyCQcYj-lmfLJ0NEP29RyRAJoN-mHCjFSZk",
+    authDomain: "atn-nancy.firebaseapp.com",
+    databaseURL: "https://atn-nancy-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "atn-nancy",
+    storageBucket: "atn-nancy.firebasestorage.app",
+    messagingSenderId: "395779853361",
+    appId: "1:395779853361:web:c603087d4b3a0d56865910"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Récupère l'ID depuis l'URL
+  const params = new URLSearchParams(window.location.search);
+  const memberId = params.get('id');
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!memberId) { showError('Aucun identifiant fourni.'); return; }
+    document.getElementById('checking-id').textContent = memberId;
+    try {
+      const snap = await get(ref(db, `atn/membres/${memberId.replace(/[^a-zA-Z0-9-]/g,'_')}`));
+      if (snap.exists()) {
+        const m = snap.val();
+        const annee = parseInt(m.annee);
+        const now = new Date().getFullYear();
+        const valide = annee >= now;
+        showResult(m, valide);
+      } else {
+        showInvalid();
+      }
+    } catch(e) {
+      showError('Erreur de connexion. Vérifiez votre connexion internet.');
+    }
+  });
+
+  function showResult(m, valide) {
+    document.getElementById('checking').style.display = 'none';
+    const res = document.getElementById('result');
+    res.style.display = 'block';
+    res.className = valide ? 'result valid' : 'result expired';
+    document.getElementById('r-icon').textContent = valide ? '✅' : '⚠️';
+    document.getElementById('r-status').textContent = valide ? 'CARTE VALIDE' : 'CARTE EXPIRÉE';
+    document.getElementById('r-status').className = valide ? 'r-status ok' : 'r-status ko';
+    document.getElementById('r-nom').textContent = m.prenom + ' ' + m.nom;
+    document.getElementById('r-type').textContent = m.type;
+    document.getElementById('r-id').textContent = m.id;
+    document.getElementById('r-annee').textContent = m.annee;
+    document.getElementById('r-date').textContent = m.createdAt ? new Date(m.createdAt).toLocaleDateString('fr-FR') : '—';
+  }
+
+  function showInvalid() {
+    document.getElementById('checking').style.display = 'none';
+    document.getElementById('invalid').style.display = 'block';
+  }
+
+  function showError(msg) {
+    document.getElementById('checking').style.display = 'none';
+    document.getElementById('error-msg').textContent = msg;
+    document.getElementById('error').style.display = 'block';
+  }
+</script>
+<style>
+:root{
+  --vert:#006B3F;--rouge:#D01221;--jaune:#F9CB15;
+  --noir:#0D0D0B;--blanc:#FAFAF5;--creme:#F3F0E6;
+  --gris:#7A7870;--vert-pale:#E8F4EF;--vert-fonce:#004D2C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--noir);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:2rem;
+  background-image:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(0,107,63,.3) 0%,transparent 70%)}
+
+.page{width:100%;max-width:480px}
+
+/* HEADER */
+.hdr{text-align:center;margin-bottom:2.5rem}
+.hdr-flag{display:flex;height:4px;border-radius:4px;overflow:hidden;width:80px;margin:0 auto 1.5rem}
+.hdr-flag div{flex:1}
+.hdr-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--jaune)}
+.hdr-logo span{color:var(--vert)}
+.hdr-sub{color:rgba(255,255,255,.4);font-size:.85rem;margin-top:.3rem}
+
+/* CHECKING */
+#checking{text-align:center;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:3rem 2rem}
+.spin-big{width:56px;height:56px;border:3px solid rgba(255,255,255,.1);
+  border-top-color:var(--vert);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 1.5rem}
+.checking-title{color:#fff;font-weight:600;font-size:1.1rem;margin-bottom:.5rem}
+.checking-id{color:var(--jaune);font-size:.85rem;font-family:monospace;
+  background:rgba(249,203,21,.1);padding:.3rem .8rem;border-radius:6px}
+
+/* RESULT */
+.result{display:none;border-radius:20px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.result.valid{border:2px solid rgba(0,107,63,.5)}
+.result.expired{border:2px solid rgba(249,203,21,.4)}
+
+.result-header{padding:2.5rem 2rem;text-align:center}
+.result.valid .result-header{background:linear-gradient(135deg,#003D22,#006B3F)}
+.result.expired .result-header{background:linear-gradient(135deg,#2A2000,#4A3A00)}
+
+.r-icon{font-size:3.5rem;margin-bottom:1rem;display:block}
+.r-status{font-size:.8rem;font-weight:800;letter-spacing:.2em;
+  padding:.4rem 1.2rem;border-radius:100px;display:inline-block}
+.r-status.ok{background:rgba(0,255,100,.15);color:#5CD49A;border:1px solid rgba(0,255,100,.3)}
+.r-status.ko{background:rgba(255,200,0,.15);color:#F9CB15;border:1px solid rgba(255,200,0,.3)}
+.r-nom{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;
+  color:#fff;margin-top:1.25rem;line-height:1.1}
+.r-type{color:rgba(255,255,255,.5);font-size:.88rem;margin-top:.4rem}
+
+.result-body{background:var(--blanc);padding:2rem}
+.r-row{display:flex;justify-content:space-between;align-items:center;
+  padding:.9rem 0;border-bottom:1px solid #ECEAE0}
+.r-row:last-child{border-bottom:none}
+.r-lbl{font-size:.78rem;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em}
+.r-val{font-weight:600;font-size:.95rem;color:var(--noir);font-family:monospace}
+
+.result-footer{background:var(--creme);padding:1.25rem 2rem;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:.75rem}
+.result.valid .result-footer{background:#E8F4EF}
+.result.expired .result-footer{background:#FFF9E6}
+.footer-seal{width:28px;height:28px;
+  background:radial-gradient(circle,#F5D060,#C8960C);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem}
+.footer-txt{font-size:.78rem;color:var(--gris);line-height:1.4}
+.footer-txt strong{color:var(--noir)}
+
+/* INVALID */
+#invalid{display:none;text-align:center;background:rgba(208,18,33,.08);
+  border:2px solid rgba(208,18,33,.3);border-radius:20px;padding:3rem 2rem}
+.inv-icon{font-size:4rem;margin-bottom:1rem}
+.inv-title{color:#FF8088;font-weight:700;font-size:1.2rem;margin-bottom:.75rem}
+.inv-text{color:rgba(255,255,255,.45);font-size:.88rem;line-height:1.6}
+
+/* ERROR */
+#error{display:none;text-align:center;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:3rem 2rem}
+#error-msg{color:rgba(255,255,255,.5);font-size:.9rem;margin-top:1rem}
+
+/* BACK */
+.back-btn{display:block;text-align:center;margin-top:1.5rem;
+  color:rgba(255,255,255,.35);font-size:.82rem;text-decoration:none;transition:color .2s}
+.back-btn:hover{color:var(--jaune)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.result,.hdr,#checking,#invalid,#error{animation:fadeIn .5s ease both}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hdr">
+    <div class="hdr-flag">
+      <div style="background:#006B3F"></div>
+      <div style="background:#F9CB15"></div>
+      <div style="background:#D01221"></div>
+    </div>
+    <div class="hdr-logo">AT<span>N</span></div>
+    <p class="hdr-sub">Système de vérification des cartes d'adhésion</p>
+  </div>
+
+  <!-- Vérification en cours -->
+  <div id="checking">
+    <div class="spin-big"></div>
+    <div class="checking-title">Vérification en cours...</div>
+    <div class="checking-id" id="checking-id"></div>
+  </div>
+
+  <!-- Résultat -->
+  <div class="result" id="result">
+    <div class="result-header">
+      <span class="r-icon" id="r-icon"></span>
+      <div class="r-status" id="r-status"></div>
+      <div class="r-nom" id="r-nom"></div>
+      <div class="r-type" id="r-type"></div>
+    </div>
+    <div class="result-body">
+      <div class="r-row"><span class="r-lbl">Numéro membre</span><span class="r-val" id="r-id"></span></div>
+      <div class="r-row"><span class="r-lbl">Type d'adhésion</span><span class="r-val" id="r-type-val" style="font-family:'DM Sans',sans-serif"></span></div>
+      <div class="r-row"><span class="r-lbl">Année de validité</span><span class="r-val" id="r-annee"></span></div>
+      <div class="r-row"><span class="r-lbl">Date d'émission</span><span class="r-val" id="r-date" style="font-family:'DM Sans',sans-serif"></span></div>
+    </div>
+    <div class="result-footer">
+      <div class="footer-seal">✓</div>
+      <div class="footer-txt">Carte émise par <strong>l'Association des Togolais de Nancy</strong><br>Vérification officielle ATN</div>
+    </div>
+  </div>
+
+  <!-- Carte invalide -->
+  <div id="invalid">
+    <div class="inv-icon">❌</div>
+    <div class="inv-title">Carte non reconnue</div>
+    <p class="inv-text">Cette carte n'existe pas dans notre base de données.<br>Elle peut être falsifiée ou le numéro est incorrect.<br><br>En cas de doute, contactez l'ATN directement.</p>
+  </div>
+
+  <!-- Erreur -->
+  <div id="error">
+    <div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div>
+    <div style="color:#fff;font-weight:600">Impossible de vérifier</div>
+    <div id="error-msg"></div>
+  </div>
+
+  <a href="index.html" class="back-btn">← Retour au site ATN</a>
+</div>
+
+<script>
+// Fix type display
+document.addEventListener('DOMContentLoaded',()=>{
+  const rt=document.getElementById('r-type');
+  const rtv=document.getElementById('r-type-val');
+  if(rt&&rtv){
+    const observer=new MutationObserver(()=>{rtv.textContent=rt.textContent});
+    observer.observe(rt,{childList:true,characterData:true,subtree:true});
+  }
+});
+</script>
+</body>
+</html>

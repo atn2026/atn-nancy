@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ATN — Administration</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -41,20 +43,19 @@
   --vert:#006B3F;--rouge:#D01221;--jaune:#F9CB15;
   --noir:#0D0D0B;--blanc:#FAFAF5;--creme:#F3F0E6;
   --gris:#7A7870;--vert-pale:#E8F4EF;--vert-fonce:#004D2C;
-  --sidebar:240px;--header:60px;
-  --border:#E8E5DC;--shadow:0 4px 24px rgba(0,0,0,.06);
+  --sidebar:240px;--header:60px;--border:#E8E5DC;
+  --shadow:0 4px 24px rgba(0,0,0,.06);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);min-height:100vh}
 
-/* ── LOGIN ── */
+/* LOGIN */
 #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:var(--noir);padding:2rem;
   background-image:radial-gradient(ellipse 60% 60% at 80% 20%,rgba(0,107,63,.3) 0%,transparent 70%),
   radial-gradient(ellipse 40% 40% at 10% 80%,rgba(208,18,33,.15) 0%,transparent 60%)}
 .login-box{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.08);border-radius:24px;
-  padding:3rem;width:100%;max-width:400px}
+  border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:3rem;width:100%;max-width:400px}
 .login-flag{display:flex;height:4px;border-radius:4px;overflow:hidden;margin-bottom:2.5rem}
 .login-flag div{flex:1}
 .login-logo{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;
@@ -81,38 +82,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
   border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── APP LAYOUT ── */
-#app{display:none;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:var(--header) 1fr;
-  min-height:100vh}
+/* APP */
+#app{display:none;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:var(--header) 1fr;min-height:100vh}
 
-/* ── HEADER ── */
-.app-header{grid-column:1/-1;background:var(--noir);
-  border-bottom:1px solid rgba(249,203,21,.12);
+/* HEADER */
+.app-header{grid-column:1/-1;background:var(--noir);border-bottom:1px solid rgba(249,203,21,.12);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 1.5rem 0 0;position:sticky;top:0;z-index:50}
-.hdr-left{display:flex;align-items:center;gap:0;height:var(--header)}
-.hdr-logo{width:var(--sidebar);display:flex;align-items:center;gap:10px;padding:0 1.5rem;
+.hdr-left{display:flex;align-items:center;height:var(--header)}
+.hdr-logo{width:var(--sidebar);display:flex;align-items:center;gap:8px;padding:0 1.5rem;
   font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--jaune);
   border-right:1px solid rgba(255,255,255,.06)}
 .hdr-logo span{color:var(--vert)}
-.hdr-badge{font-size:.7rem;color:rgba(255,255,255,.35);font-family:'DM Sans',sans-serif;
-  font-weight:500;letter-spacing:.05em;margin-left:.25rem}
+.hdr-badge{font-size:.68rem;color:rgba(255,255,255,.3);font-family:'DM Sans',sans-serif;font-weight:500}
 .hdr-right{display:flex;align-items:center;gap:1rem}
-.hdr-user{font-size:.82rem;color:rgba(255,255,255,.4)}
+.hdr-user{font-size:.8rem;color:rgba(255,255,255,.4)}
 .hdr-user strong{color:rgba(255,255,255,.7)}
 .view-btn{background:rgba(0,107,63,.2);border:1px solid rgba(0,107,63,.4);color:#5CD49A;
-  padding:.4rem 1rem;border-radius:6px;font-size:.8rem;font-weight:600;
-  text-decoration:none;transition:all .2s}
+  padding:.4rem 1rem;border-radius:6px;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .2s}
 .view-btn:hover{background:rgba(0,107,63,.35)}
 .logout-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
   color:rgba(255,255,255,.5);padding:.4rem 1rem;border-radius:6px;font-size:.8rem;
   font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .logout-btn:hover{background:rgba(208,18,33,.2);border-color:rgba(208,18,33,.4);color:#FF8088}
 
-/* ── SIDEBAR ── */
-.sidebar{background:#fff;border-right:1px solid var(--border);
-  padding:1.25rem 0;overflow-y:auto}
-.sb-section{margin-bottom:.25rem}
+/* SIDEBAR */
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:1.25rem 0;overflow-y:auto}
 .sb-lbl{font-size:.63rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
   color:var(--gris);padding:.5rem 1.25rem;margin-top:.75rem}
 .sb-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.75rem 1.25rem;
@@ -120,33 +115,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
   font-weight:500;color:#555;cursor:pointer;transition:all .15s;
   border-left:3px solid transparent;text-align:left}
 .sb-btn:hover{background:var(--vert-pale);color:var(--vert)}
-.sb-btn.active{background:var(--vert-pale);color:var(--vert);
-  border-left-color:var(--vert);font-weight:600}
+.sb-btn.active{background:var(--vert-pale);color:var(--vert);border-left-color:var(--vert);font-weight:600}
 .sb-btn .ic{width:20px;text-align:center;font-size:1rem;flex-shrink:0}
 .sb-divider{height:1px;background:var(--border);margin:.75rem 1.25rem}
 
-/* ── MAIN ── */
+/* MAIN */
 .main{padding:2.5rem;overflow-y:auto;background:var(--creme)}
-.panel{display:none}
-.panel.active{display:block}
+.panel{display:none}.panel.active{display:block}
 .panel-title{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;margin-bottom:.35rem}
 .panel-sub{color:var(--gris);font-size:.88rem;margin-bottom:2.5rem}
 
-/* ── CARDS ── */
+/* CARDS */
 .card{background:#fff;border:1px solid var(--border);border-radius:16px;
   padding:2rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
 .card-title{font-weight:600;font-size:.95rem;margin-bottom:1.5rem;
   padding-bottom:1rem;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:.6rem;color:var(--noir)}
+  display:flex;align-items:center;gap:.6rem}
 
-/* ── FORM FIELDS ── */
+/* FIELDS */
 .ff{margin-bottom:1.2rem}
-.ff label{display:block;font-size:.78rem;font-weight:600;margin-bottom:.4rem;
-  color:#444;letter-spacing:.03em}
+.ff label{display:block;font-size:.78rem;font-weight:600;margin-bottom:.4rem;color:#444}
 .ff input,.ff textarea,.ff select{width:100%;padding:.75rem 1rem;
-  border:1.5px solid var(--border);border-radius:8px;
-  font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--noir);
-  transition:border-color .2s;background:#fff;-webkit-appearance:none}
+  border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:.9rem;color:var(--noir);transition:border-color .2s;background:#fff;-webkit-appearance:none}
 .ff input:focus,.ff textarea:focus,.ff select:focus{outline:none;border-color:var(--vert)}
 .ff textarea{resize:vertical;min-height:85px}
 .ff-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
@@ -158,10 +149,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
 .save-btn:hover{background:var(--vert-fonce)}
 .save-btn:disabled{opacity:.5;cursor:not-allowed}
 .save-msg{font-size:.82rem;font-weight:600;display:none}
-.save-msg.ok{color:var(--vert)}
-.save-msg.err{color:var(--rouge)}
+.save-msg.ok{color:var(--vert)}.save-msg.err{color:var(--rouge)}
 
-/* ── NOTICE ── */
+/* NOTICES */
 .notice{display:flex;gap:.75rem;padding:1rem 1.25rem;border-radius:10px;
   font-size:.84rem;line-height:1.6;margin-bottom:1.5rem}
 .notice.info{background:#EEF3FF;border:1px solid #C5D0FF;color:#2D3EAA}
@@ -169,153 +159,133 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
 .notice.warn{background:#FFF9E6;border:1px solid rgba(201,150,12,.3);color:#7A5C0A}
 .notice-ic{font-size:1rem;flex-shrink:0;margin-top:.1rem}
 
-/* ── EVENTS EDITOR ── */
-.ev-card{border:1px solid var(--border);border-radius:12px;
-  padding:1.25rem;margin-bottom:.75rem;background:var(--creme)}
+/* EVENTS */
+.ev-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:.75rem;background:var(--creme)}
 .ev-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .ev-num{font-weight:600;font-size:.85rem;color:var(--gris)}
-.del-btn{background:none;border:none;color:var(--rouge);cursor:pointer;
-  font-size:.82rem;font-weight:600;padding:.25rem .5rem;border-radius:4px;
-  transition:background .2s}
+.del-btn{background:none;border:none;color:var(--rouge);cursor:pointer;font-size:.82rem;font-weight:600;padding:.25rem .5rem;border-radius:4px;transition:background .2s}
 .del-btn:hover{background:rgba(208,18,33,.08)}
-.add-ev-btn{width:100%;padding:.85rem;border:2px dashed rgba(0,107,63,.3);
-  border-radius:10px;background:none;font-family:'DM Sans',sans-serif;
-  font-size:.88rem;font-weight:600;color:var(--vert);cursor:pointer;
-  transition:all .2s;margin-top:.75rem}
+.add-ev-btn{width:100%;padding:.85rem;border:2px dashed rgba(0,107,63,.3);border-radius:10px;
+  background:none;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;
+  color:var(--vert);cursor:pointer;transition:all .2s;margin-top:.75rem}
 .add-ev-btn:hover{background:var(--vert-pale);border-color:var(--vert)}
 
-/* ── PHOTOS ── */
-.upload-drop{border:2px dashed rgba(0,107,63,.3);border-radius:14px;
-  padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .2s;
-  background:#fff;margin-bottom:1.5rem}
+/* PHOTOS */
+.upload-drop{border:2px dashed rgba(0,107,63,.3);border-radius:14px;padding:3rem 2rem;
+  text-align:center;cursor:pointer;transition:all .2s;background:#fff;margin-bottom:1.5rem}
 .upload-drop:hover,.upload-drop.over{border-color:var(--vert);background:var(--vert-pale)}
 .ud-icon{font-size:3rem;margin-bottom:1rem}
 .ud-title{font-weight:600;font-size:1.05rem;margin-bottom:.35rem}
 .ud-hint{color:var(--gris);font-size:.82rem}
-.prog-bar{height:6px;background:var(--border);border-radius:10px;
-  overflow:hidden;margin:1rem 0;display:none}
+.prog-bar{height:6px;background:var(--border);border-radius:10px;overflow:hidden;margin:1rem 0;display:none}
 .prog-fill{height:100%;background:var(--vert);border-radius:10px;transition:width .3s;width:0}
-.prog-txt{text-align:center;font-size:.85rem;font-weight:600;color:var(--vert);
-  margin-bottom:1rem;display:none}
-.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.prog-txt{text-align:center;font-size:.85rem;font-weight:600;color:var(--vert);margin-bottom:1rem;display:none}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .ph-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#eee}
 .ph-item img{width:100%;height:100%;object-fit:cover}
 .ph-del{position:absolute;top:6px;right:6px;background:rgba(208,18,33,.9);color:#fff;
   border:none;border-radius:50%;width:28px;height:28px;font-size:.8rem;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
-.ph-del:hover{transform:scale(1.1)}
+  cursor:pointer;display:flex;align-items:center;justify-content:center}
 .ph-cap{position:absolute;bottom:0;left:0;right:0;
   background:linear-gradient(transparent,rgba(0,0,0,.75));
   color:#fff;font-size:.68rem;padding:.75rem .4rem .35rem;text-align:center}
-.ph-empty{color:var(--gris);font-style:italic;text-align:center;
-  padding:2rem;grid-column:1/-1}
+.ph-empty{color:var(--gris);font-style:italic;text-align:center;padding:2rem;grid-column:1/-1}
 
-/* ── CARTE ── */
+/* CARTE LAYOUT */
 .carte-layout{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
-.carte-form{}
 .carte-preview-wrap{position:sticky;top:1.5rem}
-.carte-lbl{font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--gris);margin-bottom:1rem}
-/* La carte physique */
-.carte{background:linear-gradient(135deg,#003D22 0%,#005A32 35%,#006B3F 60%,#004528 100%);
-  border-radius:18px;padding:0;overflow:hidden;position:relative;
-  aspect-ratio:85.6/54;box-shadow:0 20px 60px rgba(0,107,63,.45),0 0 0 1px rgba(255,255,255,.08);
-  width:100%}
+.carte-lbl{font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gris);margin-bottom:1rem}
+
+/* LA CARTE */
+.carte{background:linear-gradient(135deg,#002D16 0%,#004D2C 35%,#006B3F 60%,#003A20 100%);
+  border-radius:18px;overflow:hidden;position:relative;
+  aspect-ratio:85.6/54;box-shadow:0 20px 60px rgba(0,107,63,.45);width:100%}
 .carte-shine{position:absolute;inset:0;
   background:linear-gradient(135deg,transparent 40%,rgba(249,203,21,.08) 55%,rgba(208,18,33,.05) 70%,transparent 85%)}
 .carte-stripe{position:absolute;top:0;left:0;right:0;height:7px;display:flex}
 .carte-stripe div{flex:1}
-.carte-body{position:relative;z-index:2;padding:1.2rem 1.4rem;
-  height:100%;display:flex;flex-direction:column;justify-content:space-between}
+.carte-body{position:relative;z-index:2;padding:6% 7%;height:100%;
+  display:flex;flex-direction:column;justify-content:space-between}
 .carte-top{display:flex;justify-content:space-between;align-items:flex-start}
-.carte-asso-logo{display:flex;flex-direction:column}
-.carte-atn{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--jaune);line-height:1}
-.carte-asso-name{font-size:.48rem;color:rgba(255,255,255,.6);line-height:1.3;margin-top:.2rem}
+.carte-atn{font-family:'Playfair Display',serif;font-size:clamp(.8rem,2.5vw,1.2rem);font-weight:900;color:var(--jaune);line-height:1}
+.carte-asso-name{font-size:clamp(.3rem,1vw,.5rem);color:rgba(255,255,255,.55);line-height:1.3;margin-top:.2rem}
 .carte-type-badge{background:rgba(249,203,21,.15);border:1px solid rgba(249,203,21,.35);
-  color:var(--jaune);font-size:.48rem;font-weight:700;letter-spacing:.08em;
-  text-transform:uppercase;padding:.2rem .6rem;border-radius:100px;white-space:nowrap}
-.carte-mid{display:flex;align-items:center;gap:.85rem}
-.carte-qr-box{width:55px;height:55px;background:#fff;border-radius:7px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px}
-.carte-qr-inner{width:100%;height:100%;display:grid;grid-template-columns:repeat(5,1fr);
-  grid-template-rows:repeat(5,1fr);gap:1px}
-.qr-px{background:#000;border-radius:1px}
-.qr-e{background:transparent}
-.carte-member{}
-.carte-nom{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;
-  color:#fff;line-height:1.1}
-.carte-id-badge{display:inline-block;background:linear-gradient(90deg,#003D22,#006B3F);
-  color:var(--jaune);font-size:.55rem;font-weight:700;padding:.2rem .55rem;
-  border-radius:4px;margin-top:.3rem;letter-spacing:.04em}
+  color:var(--jaune);font-size:clamp(.28rem,.8vw,.5rem);font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:.2rem .5rem;border-radius:100px;white-space:nowrap}
+.carte-mid{display:flex;align-items:center;gap:4%}
+.carte-qr{width:18%;aspect-ratio:1;background:#fff;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.carte-qr img{width:100%;height:100%;object-fit:contain}
+.carte-qr canvas{width:100%!important;height:auto!important}
+.carte-nom{font-family:'Playfair Display',serif;font-size:clamp(.7rem,2.2vw,1.1rem);font-weight:700;color:#fff;line-height:1.1}
+.carte-id{display:inline-block;background:linear-gradient(90deg,#002D16,#006B3F);
+  color:var(--jaune);font-size:clamp(.28rem,.8vw,.55rem);font-weight:700;
+  padding:.15rem .5rem;border-radius:4px;margin-top:.3rem;letter-spacing:.04em}
 .carte-bottom{display:flex;justify-content:space-between;align-items:flex-end}
-.carte-valid-lbl{color:rgba(255,255,255,.45);font-size:.52rem;text-transform:uppercase;letter-spacing:.08em}
-.carte-valid-val{color:#fff;font-size:.72rem;font-weight:700}
-.carte-seal{width:34px;height:34px;
+.carte-valid-lbl{color:rgba(255,255,255,.4);font-size:clamp(.28rem,.7vw,.5rem);text-transform:uppercase;letter-spacing:.08em}
+.carte-valid-val{color:#fff;font-size:clamp(.4rem,1vw,.7rem);font-weight:700}
+.carte-seal{width:10%;aspect-ratio:1;
   background:radial-gradient(circle at 35% 35%,#F5D060,#C8960C 50%,#8B6508);
   border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3)}
-.dl-btn{display:block;width:100%;margin-top:1rem;padding:.85rem;
-  background:var(--noir);color:#fff;border:none;border-radius:10px;
-  font-size:.92rem;font-weight:600;font-family:'DM Sans',sans-serif;
-  cursor:pointer;transition:all .2s;text-align:center}
-.dl-btn:hover{background:var(--vert)}
+  font-size:clamp(.5rem,1.5vw,.9rem);box-shadow:0 2px 8px rgba(0,0,0,.4)}
 
-/* ── RÉSEAUX ── */
-.rseau-item{display:flex;align-items:center;gap:1rem;
-  background:var(--creme);border-radius:10px;padding:1rem;margin-bottom:.75rem}
-.rseau-ic{width:36px;height:36px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
-.rseau-name{font-weight:600;font-size:.88rem;flex:1}
-.rseau-input{flex:2;padding:.6rem .9rem;border:1.5px solid var(--border);
-  border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;
-  transition:border-color .2s}
+/* MEMBRES LIST */
+.membres-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.membre-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;
+  display:flex;align-items:center;gap:1rem}
+.membre-avatar{width:44px;height:44px;background:var(--vert-pale);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.membre-info{flex:1;min-width:0}
+.membre-nom{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.membre-detail{font-size:.78rem;color:var(--gris);margin-top:.15rem}
+.membre-badge{font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:100px;
+  background:var(--vert-pale);color:var(--vert-fonce);white-space:nowrap}
+.membre-expired{background:#FFF0F0;color:#8B0A14}
+.membre-del{background:none;border:none;color:var(--gris);cursor:pointer;font-size:.85rem;
+  padding:.3rem;border-radius:6px;transition:all .2s;flex-shrink:0}
+.membre-del:hover{background:rgba(208,18,33,.08);color:var(--rouge)}
+
+/* RÉSEAUX */
+.rseau-item{display:flex;align-items:center;gap:1rem;background:var(--creme);border-radius:10px;padding:1rem;margin-bottom:.75rem}
+.rseau-ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.rseau-name{font-weight:600;font-size:.88rem;width:90px;flex-shrink:0}
+.rseau-input{flex:1;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;transition:border-color .2s}
 .rseau-input:focus{outline:none;border-color:var(--vert)}
 
-/* ── ANIMATIONS ── */
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+/* DL BTN */
+.dl-btn{width:100%;padding:.95rem;background:var(--noir);color:#fff;border:none;border-radius:10px;
+  font-size:.95rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;
+  transition:all .2s;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.dl-btn:hover{background:var(--vert)}
 
-/* ── RESPONSIVE ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(max-width:900px){
-  #app{grid-template-columns:1fr;grid-template-rows:auto}
-  .sidebar{display:none}
-  .hdr-logo{width:auto}
-  .carte-layout{grid-template-columns:1fr}
-  .ff-row,.ff-3{grid-template-columns:1fr}
+  #app{grid-template-columns:1fr}.sidebar{display:none}
+  .carte-layout{grid-template-columns:1fr}.ff-row,.ff-3{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-flag">
-      <div style="background:#006B3F"></div>
-      <div style="background:#F9CB15"></div>
-      <div style="background:#D01221"></div>
-    </div>
+    <div class="login-flag"><div style="background:#006B3F"></div><div style="background:#F9CB15"></div><div style="background:#D01221"></div></div>
     <div class="login-logo">AT<span>N</span></div>
     <p class="login-sub">Interface Administrateur — Accès sécurisé</p>
-    <div class="lf"><label>Adresse email</label>
-      <input type="email" id="l-email" placeholder="admin@atn-nancy.fr" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="lf"><label>Mot de passe</label>
-      <input type="password" id="l-pwd" placeholder="••••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
+    <div class="lf"><label>Email</label><input type="email" id="l-email" placeholder="admin@atn-nancy.fr" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="••••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <button class="login-btn" id="l-btn" onclick="doLogin()">Se connecter</button>
     <div class="login-err" id="l-err"></div>
-    <p class="login-note">Accès réservé à l'administrateur ATN<br>Connexion sécurisée via Google Firebase</p>
+    <p class="login-note">Accès réservé à l'administrateur ATN</p>
   </div>
 </div>
 
-<!-- ══ APP ══ -->
+<!-- APP -->
 <div id="app">
-
-  <!-- HEADER -->
   <header class="app-header">
     <div class="hdr-left">
-      <div class="hdr-logo">AT<span>N</span><span class="hdr-badge">Admin</span></div>
+      <div class="hdr-logo">AT<span>N</span><span class="hdr-badge" style="margin-left:.5rem">Admin</span></div>
     </div>
     <div class="hdr-right">
       <div class="hdr-user">Connecté : <strong id="user-name"></strong></div>
@@ -324,55 +294,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
     </div>
   </header>
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sb-section">
-      <div class="sb-lbl">Contenu du site</div>
-      <button class="sb-btn active" onclick="nav('accueil',this)"><span class="ic">🏠</span>Page d'accueil</button>
-      <button class="sb-btn" onclick="nav('apropos',this)"><span class="ic">👥</span>À propos</button>
-      <button class="sb-btn" onclick="nav('agenda',this)"><span class="ic">📅</span>Agenda</button>
-      <button class="sb-btn" onclick="nav('galerie',this)"><span class="ic">📸</span>Galerie photos</button>
-    </div>
+    <div class="sb-lbl">Contenu</div>
+    <button class="sb-btn active" onclick="nav('accueil',this)"><span class="ic">🏠</span>Accueil</button>
+    <button class="sb-btn" onclick="nav('apropos',this)"><span class="ic">👥</span>À propos</button>
+    <button class="sb-btn" onclick="nav('agenda',this)"><span class="ic">📅</span>Agenda</button>
+    <button class="sb-btn" onclick="nav('galerie',this)"><span class="ic">📸</span>Galerie photos</button>
     <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-lbl">Membres</div>
-      <button class="sb-btn" onclick="nav('carte',this)"><span class="ic">🎫</span>Cartes d'adhésion</button>
-    </div>
+    <div class="sb-lbl">Membres</div>
+    <button class="sb-btn" onclick="nav('carte',this)"><span class="ic">🎫</span>Créer une carte</button>
+    <button class="sb-btn" onclick="nav('membres',this)"><span class="ic">👤</span>Liste des membres</button>
     <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-lbl">Paramètres</div>
-      <button class="sb-btn" onclick="nav('reseaux',this)"><span class="ic">🔗</span>Réseaux sociaux</button>
-      <button class="sb-btn" onclick="nav('contact',this)"><span class="ic">📧</span>Contact</button>
-      <button class="sb-btn" onclick="nav('popup',this)"><span class="ic">💬</span>Message popup</button>
-    </div>
+    <div class="sb-lbl">Paramètres</div>
+    <button class="sb-btn" onclick="nav('reseaux',this)"><span class="ic">🔗</span>Réseaux sociaux</button>
+    <button class="sb-btn" onclick="nav('contact',this)"><span class="ic">📧</span>Contact</button>
+    <button class="sb-btn" onclick="nav('popup',this)"><span class="ic">💬</span>Popup d'accueil</button>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
 
-    <!-- ── ACCUEIL ── -->
+    <!-- ACCUEIL -->
     <div class="panel active" id="p-accueil">
       <div class="panel-title">🏠 Page d'accueil</div>
-      <p class="panel-sub">Modifiez les textes affichés sur la bannière principale.</p>
+      <p class="panel-sub">Modifiez les textes de la bannière principale.</p>
       <div class="card">
-        <div class="card-title">✏️ Bannière héro</div>
-        <div class="ff"><label>Accroche (petite ligne colorée)</label>
-          <input type="text" id="e-eyebrow" placeholder="🇹🇬 Lomé à Nancy..."></div>
-        <div class="ff"><label>Sous-titre de présentation</label>
-          <textarea id="e-sub" rows="3"></textarea></div>
-        <div class="save-row">
-          <button class="save-btn" onclick="saveSection('accueil')">💾 Publier</button>
-          <span class="save-msg" id="m-accueil"></span>
-        </div>
+        <div class="card-title">✏️ Bannière</div>
+        <div class="ff"><label>Accroche (petite ligne)</label><input type="text" id="e-eyebrow"></div>
+        <div class="ff"><label>Sous-titre</label><textarea id="e-sub" rows="3"></textarea></div>
+        <div class="save-row"><button class="save-btn" onclick="saveSection('accueil')">💾 Publier</button><span class="save-msg" id="m-accueil"></span></div>
       </div>
     </div>
 
-    <!-- ── APROPOS ── -->
+    <!-- APROPOS -->
     <div class="panel" id="p-apropos">
       <div class="panel-title">👥 À propos</div>
-      <p class="panel-sub">Présentez l'association et mettez à jour les chiffres clés.</p>
+      <p class="panel-sub">Présentation et chiffres clés de l'association.</p>
       <div class="card">
-        <div class="card-title">📝 Textes de présentation</div>
+        <div class="card-title">📝 Textes</div>
         <div class="ff"><label>Paragraphe 1</label><textarea id="e-p1" rows="3"></textarea></div>
         <div class="ff"><label>Paragraphe 2</label><textarea id="e-p2" rows="3"></textarea></div>
         <div class="ff"><label>Paragraphe 3</label><textarea id="e-p3" rows="3"></textarea></div>
@@ -385,17 +343,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
           <div class="ff"><label>Années</label><input type="text" id="e-s3" placeholder="20+"></div>
         </div>
       </div>
-      <div class="save-row">
-        <button class="save-btn" onclick="saveSection('apropos')">💾 Publier</button>
-        <span class="save-msg" id="m-apropos"></span>
-      </div>
+      <div class="save-row"><button class="save-btn" onclick="saveSection('apropos')">💾 Publier</button><span class="save-msg" id="m-apropos"></span></div>
     </div>
 
-    <!-- ── AGENDA ── -->
+    <!-- AGENDA -->
     <div class="panel" id="p-agenda">
       <div class="panel-title">📅 Agenda</div>
       <p class="panel-sub">Gérez les événements affichés sur le site.</p>
-      <div class="notice ok"><span class="notice-ic">✅</span>Les modifications sont publiées immédiatement sur le site.</div>
+      <div class="notice ok"><span class="notice-ic">✅</span>Modifications publiées immédiatement.</div>
       <div id="ev-editor"></div>
       <button class="add-ev-btn" onclick="addEvent()">+ Ajouter un événement</button>
       <div class="save-row" style="margin-top:1.5rem">
@@ -404,37 +359,37 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
       </div>
     </div>
 
-    <!-- ── GALERIE ── -->
+    <!-- GALERIE -->
     <div class="panel" id="p-galerie">
       <div class="panel-title">📸 Galerie photos</div>
-      <p class="panel-sub">Ajoutez des photos avec titres. Elles apparaissent immédiatement.</p>
-      <div class="notice ok"><span class="notice-ic">🔒</span>Photos stockées sur Firebase Storage (Google) — jamais perdues.</div>
+      <p class="panel-sub">Ajoutez, titrez et supprimez les photos de la galerie.</p>
+      <div class="notice ok"><span class="notice-ic">☁️</span><div>Les photos sont stockées sur <strong>Cloudinary</strong> — service gratuit, fiable, sans limite pour une association. Elles n'utilisent pas Firebase Storage.</div></div>
       <div class="card">
         <div class="card-title">⬆️ Ajouter des photos</div>
-        <div class="upload-drop" id="drop-zone"
-          onclick="document.getElementById('ph-file').click()"
+        <div class="upload-drop" id="drop-zone" onclick="document.getElementById('ph-file').click()"
           ondragover="onOver(event)" ondragleave="onLeave()" ondrop="onDrop(event)">
           <div class="ud-icon">📷</div>
-          <div class="ud-title">Cliquez ou glissez vos photos</div>
-          <p class="ud-hint">JPG, PNG, WEBP — plusieurs à la fois — vous pouvez ajouter un titre après l'upload</p>
+          <div class="ud-title">Cliquez ou glissez vos photos ici</div>
+          <p class="ud-hint">JPG, PNG, WEBP — plusieurs à la fois</p>
           <input type="file" id="ph-file" accept="image/*" multiple style="display:none" onchange="doUpload(this.files)">
         </div>
         <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
         <div class="prog-txt" id="prog-txt"></div>
+        <div id="upload-err" style="display:none;color:var(--rouge);font-size:.85rem;font-weight:600;padding:.75rem;background:#FFF0F0;border-radius:8px;margin-top:.5rem"></div>
       </div>
       <div class="card">
-        <div class="card-title">🖼 Photos en ligne</div>
+        <div class="card-title">🖼 Photos publiées <span id="ph-count" style="font-weight:400;color:var(--gris);font-size:.82rem"></span></div>
         <div class="photos-grid" id="ph-grid"></div>
       </div>
     </div>
 
-    <!-- ── CARTE ── -->
+    <!-- CARTE -->
     <div class="panel" id="p-carte">
-      <div class="panel-title">🎫 Cartes d'adhésion</div>
-      <p class="panel-sub">Générez et téléchargez les cartes officielles des membres ATN.</p>
-      <div class="notice info"><span class="notice-ic">ℹ️</span>Seul l'administrateur peut créer des cartes d'adhésion. Remplissez les informations du membre et téléchargez la carte en PNG haute qualité.</div>
+      <div class="panel-title">🎫 Créer une carte d'adhésion</div>
+      <p class="panel-sub">Générez la carte officielle d'un membre. Le QR code est scannable pour vérifier l'authenticité.</p>
+      <div class="notice info"><span class="notice-ic">🔐</span>Seul l'administrateur peut créer des cartes. Le membre est enregistré dans la base de données et son QR code permet une vérification instantanée.</div>
       <div class="carte-layout">
-        <div class="carte-form">
+        <div>
           <div class="card">
             <div class="card-title">👤 Informations du membre</div>
             <div class="ff-row">
@@ -459,105 +414,114 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
               </div>
             </div>
           </div>
-          <button class="save-btn" style="width:100%;justify-content:center;font-size:1rem;padding:1rem" onclick="downloadCarte()">
-            ⬇️ Télécharger la carte (PNG haute qualité)
-          </button>
+          <button class="dl-btn" onclick="genererCarte()">⬇️ Enregistrer le membre et télécharger la carte</button>
+          <div id="carte-success" style="display:none;margin-top:1rem;padding:1rem;background:var(--vert-pale);border:1px solid rgba(0,107,63,.2);border-radius:8px;color:var(--vert-fonce);font-size:.85rem;font-weight:600">✅ Membre enregistré ! Carte téléchargée avec QR code de vérification.</div>
         </div>
         <div class="carte-preview-wrap">
           <p class="carte-lbl">Aperçu en temps réel</p>
-          <div class="carte" id="carte">
+          <div class="carte" id="carte-preview">
             <div class="carte-shine"></div>
-            <div class="carte-stripe">
-              <div style="background:#006B3F"></div>
-              <div style="background:#F9CB15"></div>
-              <div style="background:#D01221"></div>
-            </div>
+            <div class="carte-stripe"><div style="background:#006B3F"></div><div style="background:#F9CB15"></div><div style="background:#D01221"></div></div>
             <div class="carte-body">
               <div class="carte-top">
-                <div class="carte-asso-logo">
-                  <div class="carte-atn">ATN</div>
-                  <div class="carte-asso-name">Association des<br>Togolais de Nancy</div>
-                </div>
-                <div class="carte-type-badge" id="c-type-lbl">Adhésion Annuelle</div>
+                <div><div class="carte-atn">ATN</div><div class="carte-asso-name">Association des<br>Togolais de Nancy</div></div>
+                <div class="carte-type-badge" id="c-type">Adhésion Annuelle</div>
               </div>
               <div class="carte-mid">
-                <div class="carte-qr-box">
-                  <div class="carte-qr-inner" id="c-qr">
-                    <div class="qr-px"></div><div class="qr-px"></div><div class="qr-px"></div><div class="qr-e"></div><div class="qr-px"></div>
-                    <div class="qr-px"></div><div class="qr-e"></div><div class="qr-px"></div><div class="qr-e"></div><div class="qr-e"></div>
-                    <div class="qr-px"></div><div class="qr-px"></div><div class="qr-px"></div><div class="qr-e"></div><div class="qr-px"></div>
-                    <div class="qr-e"></div><div class="qr-px"></div><div class="qr-e"></div><div class="qr-px"></div><div class="qr-e"></div>
-                    <div class="qr-px"></div><div class="qr-e"></div><div class="qr-px"></div><div class="qr-px"></div><div class="qr-px"></div>
-                  </div>
-                </div>
-                <div class="carte-member">
-                  <div class="carte-nom" id="c-nom">Prénom Nom</div>
-                  <div class="carte-id-badge" id="c-id">ID: ATN-2026-001</div>
-                </div>
+                <div class="carte-qr" id="c-qr-wrap"><div id="c-qr-box" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.5rem;color:#999">QR</div></div>
+                <div><div class="carte-nom" id="c-nom">Prénom Nom</div><div class="carte-id" id="c-id">ID: ATN-2026-001</div></div>
               </div>
               <div class="carte-bottom">
-                <div>
-                  <div class="carte-valid-lbl">Validité</div>
-                  <div class="carte-valid-val" id="c-annee">2026</div>
-                </div>
+                <div><div class="carte-valid-lbl">Validité</div><div class="carte-valid-val" id="c-annee">2026</div></div>
                 <div class="carte-seal">✓</div>
               </div>
             </div>
           </div>
+          <p style="font-size:.72rem;color:var(--gris);margin-top:.75rem;text-align:center">📱 Le QR code sera scannable une fois la carte générée</p>
         </div>
       </div>
     </div>
 
-    <!-- ── RÉSEAUX ── -->
+    <!-- MEMBRES -->
+    <div class="panel" id="p-membres">
+      <div class="panel-title">👤 Liste des membres</div>
+      <p class="panel-sub">Tous les membres enregistrés avec leur carte d'adhésion.</p>
+      <div class="card">
+        <div class="card-title">👥 Membres enregistrés (<span id="mb-count">0</span>)</div>
+        <div class="membres-grid" id="membres-grid"></div>
+      </div>
+    </div>
+
+    <!-- RÉSEAUX -->
     <div class="panel" id="p-reseaux">
       <div class="panel-title">🔗 Réseaux sociaux</div>
-      <p class="panel-sub">Ajoutez ou modifiez les liens vers vos réseaux. Laissez vide pour masquer.</p>
+      <p class="panel-sub">Ajoutez vos liens. Laissez vide pour masquer.</p>
       <div class="card">
-        <div class="card-title">📲 Vos pages et profils</div>
-        <div id="reseaux-list">
-          <div class="rseau-item"><div class="rseau-ic" style="background:#E7F3FF">📘</div><div class="rseau-name">Facebook</div><input class="rseau-input" id="r-facebook" type="url" placeholder="https://facebook.com/..."></div>
-          <div class="rseau-item"><div class="rseau-ic" style="background:#FDF0F5">📸</div><div class="rseau-name">Instagram</div><input class="rseau-input" id="r-instagram" type="url" placeholder="https://instagram.com/..."></div>
-          <div class="rseau-item"><div class="rseau-ic" style="background:#E8F8EE">💬</div><div class="rseau-name">WhatsApp</div><input class="rseau-input" id="r-whatsapp" type="url" placeholder="https://chat.whatsapp.com/..."></div>
-          <div class="rseau-item"><div class="rseau-ic" style="background:#FFF0F0">▶</div><div class="rseau-name">YouTube</div><input class="rseau-input" id="r-youtube" type="url" placeholder="https://youtube.com/..."></div>
-          <div class="rseau-item"><div class="rseau-ic" style="background:#F5F5F5">🎵</div><div class="rseau-name">TikTok</div><input class="rseau-input" id="r-tiktok" type="url" placeholder="https://tiktok.com/@..."></div>
-          <div class="rseau-item"><div class="rseau-ic" style="background:#E8F0FB">💼</div><div class="rseau-name">LinkedIn</div><input class="rseau-input" id="r-linkedin" type="url" placeholder="https://linkedin.com/..."></div>
-          <div class="rseau-item"><div class="rseau-ic" style="background:#E8F4FF">🐦</div><div class="rseau-name">Twitter / X</div><input class="rseau-input" id="r-twitter" type="url" placeholder="https://twitter.com/..."></div>
-        </div>
-        <div class="save-row">
-          <button class="save-btn" onclick="saveSection('reseaux')">💾 Publier</button>
-          <span class="save-msg" id="m-reseaux"></span>
-        </div>
+        <div class="card-title">📲 Vos pages</div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#E7F3FF">📘</div><div class="rseau-name">Facebook</div><input class="rseau-input" id="r-facebook" type="url" placeholder="https://facebook.com/..."></div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#FDF0F5">📸</div><div class="rseau-name">Instagram</div><input class="rseau-input" id="r-instagram" type="url" placeholder="https://instagram.com/..."></div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#E8F8EE">💬</div><div class="rseau-name">WhatsApp</div><input class="rseau-input" id="r-whatsapp" type="url" placeholder="https://chat.whatsapp.com/..."></div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#FFF0F0">▶</div><div class="rseau-name">YouTube</div><input class="rseau-input" id="r-youtube" type="url" placeholder="https://youtube.com/..."></div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#F5F5F5">🎵</div><div class="rseau-name">TikTok</div><input class="rseau-input" id="r-tiktok" type="url" placeholder="https://tiktok.com/@..."></div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#E8F0FB">💼</div><div class="rseau-name">LinkedIn</div><input class="rseau-input" id="r-linkedin" type="url" placeholder="https://linkedin.com/..."></div>
+        <div class="rseau-item"><div class="rseau-ic" style="background:#E8F4FF">🐦</div><div class="rseau-name">Twitter/X</div><input class="rseau-input" id="r-twitter" type="url" placeholder="https://twitter.com/..."></div>
+        <div class="save-row"><button class="save-btn" onclick="saveSection('reseaux')">💾 Publier</button><span class="save-msg" id="m-reseaux"></span></div>
       </div>
     </div>
 
-    <!-- ── CONTACT ── -->
+    <!-- CONTACT -->
     <div class="panel" id="p-contact">
       <div class="panel-title">📧 Coordonnées</div>
-      <p class="panel-sub">Mettez à jour les informations de contact affichées sur le site.</p>
+      <p class="panel-sub">Informations de contact affichées sur le site.</p>
       <div class="card">
-        <div class="card-title">📬 Informations de contact</div>
-        <div class="ff"><label>Email de contact</label><input type="email" id="e-email" placeholder="Associationdestogolaisdenancya@gmail.com"></div>
-        <div class="ff"><label>Ville affichée</label><input type="text" id="e-ville" placeholder="Nancy, Meurthe-et-Moselle (54)"></div>
-        <div class="save-row">
-          <button class="save-btn" onclick="saveSection('contact')">💾 Publier</button>
-          <span class="save-msg" id="m-contact"></span>
-        </div>
+        <div class="card-title">📬 Contact</div>
+        <div class="ff"><label>Email</label><input type="email" id="e-email" placeholder="Associationdestogolaisdenancya@gmail.com"></div>
+        <div class="ff"><label>Ville</label><input type="text" id="e-ville" placeholder="Nancy, Meurthe-et-Moselle (54)"></div>
+        <div class="save-row"><button class="save-btn" onclick="saveSection('contact')">💾 Publier</button><span class="save-msg" id="m-contact"></span></div>
       </div>
     </div>
 
-    <!-- ── POPUP ── -->
+    <!-- POPUP -->
     <div class="panel" id="p-popup">
-      <div class="panel-title">💬 Message popup</div>
-      <p class="panel-sub">Ce message s'affiche à l'arrivée des visiteurs sur le site.</p>
+      <div class="panel-title">💬 Popup d'accueil</div>
+      <p class="panel-sub">Message affiché à l'arrivée des visiteurs.</p>
       <div class="card">
-        <div class="card-title">✏️ Contenu du popup</div>
-        <div class="notice warn"><span class="notice-ic">💡</span>Le popup s'affiche automatiquement avec le prochain événement de votre agenda. Il ne s'affiche qu'une fois par visite.</div>
-        <div class="ff"><label>Titre du popup</label><input type="text" id="e-pp-title" placeholder="Bienvenue sur le site de l'ATN !"></div>
-        <div class="ff"><label>Texte du popup</label><textarea id="e-pp-text" rows="3" placeholder="Découvrez notre communauté..."></textarea></div>
-        <div class="save-row">
-          <button class="save-btn" onclick="saveSection('popup')">💾 Publier</button>
-          <span class="save-msg" id="m-popup"></span>
-        </div>
+        <div class="card-title">✏️ Contenu</div>
+        <div class="notice warn"><span class="notice-ic">💡</span>Le popup affiche automatiquement le prochain événement de l'agenda.</div>
+        <div class="ff"><label>Titre</label><input type="text" id="e-pp-title" placeholder="Bienvenue sur le site de l'ATN !"></div>
+        <div class="ff"><label>Texte</label><textarea id="e-pp-text" rows="3"></textarea></div>
+        <div class="save-row"><button class="save-btn" onclick="saveSection('popup')">💾 Publier</button><span class="save-msg" id="m-popup"></span></div>
+      </div>
+    </div>
+
+    <!-- SECTIONS -->
+    <div class="panel" id="p-sections">
+      <div class="panel-title">🗑 Gérer les sections</div>
+      <p class="panel-sub">Supprimez ou réinitialisez le contenu de sections entières du site.</p>
+      <div class="notice warn"><span class="notice-ic">⚠️</span>Ces actions sont irréversibles. Le contenu supprimé sera immédiatement retiré du site public.</div>
+      <div class="card">
+        <div class="card-title">📅 Agenda</div>
+        <p style="font-size:.88rem;color:var(--gris);margin-bottom:1.25rem">Supprime tous les événements de l'agenda. Le site affichera "Aucun événement à venir".</p>
+        <button class="save-btn" style="background:var(--rouge)" onclick="clearSection('events','tous les événements de l\'agenda')">🗑 Vider l'agenda</button>
+        <span class="save-msg" id="m-clear-events"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">📸 Galerie photos</div>
+        <p style="font-size:.88rem;color:var(--gris);margin-bottom:1.25rem">Supprime toutes les photos de la galerie (base de données uniquement — les fichiers Firebase Storage restent).</p>
+        <button class="save-btn" style="background:var(--rouge)" onclick="clearSection('photos','toutes les photos de la galerie')">🗑 Vider la galerie</button>
+        <span class="save-msg" id="m-clear-photos"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">💬 Popup d'accueil</div>
+        <p style="font-size:.88rem;color:var(--gris);margin-bottom:1.25rem">Désactive le popup d'accueil. Les visiteurs ne verront plus de message en arrivant sur le site.</p>
+        <button class="save-btn" style="background:var(--rouge)" onclick="clearSection('popup','le popup d\'accueil')">🗑 Désactiver le popup</button>
+        <span class="save-msg" id="m-clear-popup"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">🔗 Réseaux sociaux</div>
+        <p style="font-size:.88rem;color:var(--gris);margin-bottom:1.25rem">Supprime tous les liens réseaux sociaux. Seul le bouton HelloAsso restera visible.</p>
+        <button class="save-btn" style="background:var(--rouge)" onclick="clearSection('reseaux','tous les réseaux sociaux')">🗑 Supprimer les réseaux</button>
+        <span class="save-msg" id="m-clear-reseaux"></span>
       </div>
     </div>
 
@@ -565,38 +529,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);
 </div>
 
 <script>
+// ════ CONFIG ════
+// URL de base du site pour les QR codes — CHANGEZ CELA avec votre vraie URL GitHub Pages
+const SITE_URL = 'https://atn2026.github.io/ATN-NANCY';
+
 // ════ AUTH ════
 async function doLogin(){
   const email=document.getElementById('l-email').value.trim();
   const pwd=document.getElementById('l-pwd').value;
   const btn=document.getElementById('l-btn');
   const err=document.getElementById('l-err');
-  err.style.display='none';
-  btn.disabled=true;
+  err.style.display='none';btn.disabled=true;
   btn.innerHTML='<span class="spin"></span> Connexion...';
   try{
     const {auth,signInWithEmailAndPassword}=window._fb;
     await signInWithEmailAndPassword(auth,email,pwd);
   }catch(e){
     err.style.display='block';
-    const msgs={'auth/invalid-credential':'Email ou mot de passe incorrect.','auth/user-not-found':'Aucun compte avec cet email.','auth/wrong-password':'Mot de passe incorrect.','auth/too-many-requests':'Trop de tentatives. Attendez quelques minutes.'};
+    const msgs={'auth/invalid-credential':'Email ou mot de passe incorrect.','auth/user-not-found':'Compte introuvable.','auth/wrong-password':'Mot de passe incorrect.','auth/too-many-requests':'Trop de tentatives.'};
     err.textContent=msgs[e.code]||'Erreur : '+e.message;
     btn.disabled=false;btn.textContent='Se connecter';
   }
 }
 function doLogout(){window._fb.signOut(window._fb.auth)}
 
-// ════ NAVIGATION ════
+// ════ NAV ════
 function nav(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('p-'+id).classList.add('active');
   btn.classList.add('active');
+  if(id==='membres') loadMembres();
 }
 
 // ════ DATA ════
-let D={};
-let evts=[];
+let D={},evts=[];
 
 function loadAll(){
   const {db,ref,onValue}=window._fb;
@@ -625,6 +592,7 @@ function fillForms(){
 
 async function saveSection(sec){
   const btn=event.currentTarget;
+  const origText=btn.innerHTML;
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Publication...';
   const msgEl=document.getElementById('m-'+sec);
   msgEl.style.display='none';
@@ -642,36 +610,29 @@ async function saveSection(sec){
   try{
     const {db,ref,set}=window._fb;
     await set(ref(db,'atn'),{...D,...patch});
-    msgEl.textContent='✅ Publié avec succès !';
-    msgEl.className='save-msg ok';msgEl.style.display='inline';
+    msgEl.textContent='✅ Publié !';msgEl.className='save-msg ok';msgEl.style.display='inline';
     setTimeout(()=>msgEl.style.display='none',3000);
   }catch(e){
-    msgEl.textContent='❌ Erreur : '+e.message;
-    msgEl.className='save-msg err';msgEl.style.display='inline';
+    msgEl.textContent='❌ Erreur : '+e.message;msgEl.className='save-msg err';msgEl.style.display='inline';
   }
-  btn.disabled=false;
-  if(sec==='agenda') btn.innerHTML='💾 Publier l\'agenda';
-  else btn.innerHTML='💾 Publier';
+  btn.disabled=false;btn.innerHTML=origText;
 }
 
-function v(id){const el=document.getElementById(id);return el?el.value:'';}
+function v(id){const el=document.getElementById(id);return el?el.value:''}
 
 // ════ EVENTS ════
 function renderEvEditor(events){
   evts=JSON.parse(JSON.stringify(events));
   const c=document.getElementById('ev-editor');
-  if(!evts.length){c.innerHTML='<p style="color:var(--gris);font-style:italic;margin-bottom:1rem">Aucun événement. Cliquez sur + pour en ajouter.</p>';return}
+  if(!evts.length){c.innerHTML='<p style="color:var(--gris);font-style:italic;margin-bottom:1rem">Aucun événement. Cliquez + pour en ajouter.</p>';return}
   c.innerHTML=evts.map((e,i)=>`
     <div class="ev-card">
-      <div class="ev-card-hdr">
-        <span class="ev-num">Événement ${i+1}</span>
-        <button class="del-btn" onclick="delEvent(${i})">🗑 Supprimer</button>
-      </div>
+      <div class="ev-card-hdr"><span class="ev-num">Événement ${i+1}</span><button class="del-btn" onclick="delEvent(${i})">🗑 Supprimer</button></div>
       <div class="ff-row" style="margin-bottom:1rem">
-        <div class="ff" style="margin:0"><label>Jour</label><input type="text" value="${e.day}" onchange="evts[${i}].day=this.value" maxlength="2" placeholder="14"></div>
-        <div class="ff" style="margin:0"><label>Mois</label><input type="text" value="${e.month}" onchange="evts[${i}].month=this.value" maxlength="5" placeholder="Juin"></div>
+        <div class="ff" style="margin:0"><label>Jour</label><input type="text" value="${e.day}" onchange="evts[${i}].day=this.value" maxlength="2"></div>
+        <div class="ff" style="margin:0"><label>Mois</label><input type="text" value="${e.month}" onchange="evts[${i}].month=this.value" maxlength="5"></div>
       </div>
-      <div class="ff"><label>Nom de l'événement</label><input type="text" value="${e.name}" onchange="evts[${i}].name=this.value"></div>
+      <div class="ff"><label>Nom</label><input type="text" value="${e.name}" onchange="evts[${i}].name=this.value"></div>
       <div class="ff-row">
         <div class="ff" style="margin:0"><label>Lieu</label><input type="text" value="${e.location}" onchange="evts[${i}].location=this.value"></div>
         <div class="ff" style="margin:0"><label>Catégorie</label>
@@ -685,67 +646,107 @@ function renderEvEditor(events){
       </div>
     </div>`).join('');
 }
-function setBadge(i,v){
-  evts[i].badge=v;
-  const m={culture:'bc',sport:'bsp',social:'bs','solidarité':'bso'};
-  evts[i].bc=m[v]||'bc';
-}
+function setBadge(i,val){evts[i].badge=val;const m={culture:'bc',sport:'bsp',social:'bs','solidarité':'bso'};evts[i].bc=m[val]||'bc'}
 function addEvent(){evts.push({day:'01',month:'Jan',name:'Nouvel événement',location:'Nancy',badge:'culture',bc:'bc'});renderEvEditor(evts)}
-function delEvent(i){if(confirm('Supprimer cet événement ?')){evts.splice(i,1);renderEvEditor(evts)}}
+function delEvent(i){if(confirm('Supprimer ?')){evts.splice(i,1);renderEvEditor(evts)}}
 
 // ════ PHOTOS ════
 function onOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('over')}
 function onLeave(){document.getElementById('drop-zone').classList.remove('over')}
 function onDrop(e){e.preventDefault();onLeave();doUpload(e.dataTransfer.files)}
 
+// ════ CLOUDINARY CONFIG ════
+const CLOUDINARY_CLOUD = 'dvyxmd2sj';
+const CLOUDINARY_PRESET = 'atn_upload';
+
 async function doUpload(files){
   if(!files||!files.length)return;
-  const {storage,sRef,uploadBytes,getDownloadURL,db,ref,set}=window._fb;
+  const {db,ref,set}=window._fb;
   const bar=document.getElementById('prog-bar');
   const fill=document.getElementById('prog-fill');
   const txt=document.getElementById('prog-txt');
+  const errEl=document.getElementById('upload-err');
+  errEl.style.display='none';
   bar.style.display='block';txt.style.display='block';
+  let success=0;
   for(let i=0;i<files.length;i++){
     const file=files[i];
-    const pct=Math.round(i/files.length*100);
+    const pct=Math.round((i/files.length)*100);
     fill.style.width=pct+'%';
-    txt.textContent=`⏳ Upload ${i+1}/${files.length} — ${file.name}`;
-    const id='photo_'+Date.now()+'_'+i;
-    const path=`atn-photos/${id}`;
+    txt.textContent='⏳ Upload '+(i+1)+'/'+files.length+' — '+file.name;
     try{
-      const snap=await uploadBytes(sRef(storage,path),file);
-      const url=await getDownloadURL(snap.ref);
+      // Upload vers Cloudinary
+      const formData=new FormData();
+      formData.append('file',file);
+      formData.append('upload_preset',CLOUDINARY_PRESET);
+      formData.append('folder','atn-nancy');
+      const res=await fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD+'/image/upload',{
+        method:'POST',body:formData
+      });
+      if(!res.ok) throw new Error('Erreur Cloudinary : '+res.status);
+      const data=await res.json();
+      const url=data.secure_url;
+      const id='photo_'+data.public_id.replace(/[^a-zA-Z0-9_-]/g,'_')+'_'+Date.now();
       const caption=file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
-      await set(ref(db,`atn/photos/${id}`),{id,url,path,caption,subcaption:'',date:new Date().toISOString()});
-    }catch(e){txt.textContent='❌ Erreur : '+e.message}
+      // Sauvegarde URL dans Firebase
+      await set(ref(db,'atn/photos/'+id),{
+        id,url,
+        cloudinary_id:data.public_id,
+        caption,subcaption:'',
+        date:new Date().toISOString()
+      });
+      success++;
+    }catch(e){
+      console.error('Upload error:',e);
+      errEl.style.display='block';
+      errEl.textContent='❌ Erreur : '+e.message;
+    }
   }
   fill.style.width='100%';
-  txt.textContent=`✅ ${files.length} photo(s) ajoutée(s) !`;
-  setTimeout(()=>{bar.style.display='none';txt.style.display='none';fill.style.width='0'},3000);
+  if(success>0) txt.textContent='✅ '+success+' photo(s) ajoutée(s) avec succès !';
+  else txt.textContent='❌ Aucun upload réussi. Vérifiez votre connexion.';
+  setTimeout(()=>{bar.style.display='none';txt.style.display='none';fill.style.width='0'},4000);
   document.getElementById('ph-file').value='';
 }
 
 function renderPhotos(photos){
   const g=document.getElementById('ph-grid');
-  if(!photos||!photos.length){g.innerHTML='<p class="ph-empty">Aucune photo. Ajoutez-en ci-dessus !</p>';return}
+  const countEl=document.getElementById('ph-count');
+  if(countEl) countEl.textContent=photos&&photos.length?'('+photos.length+' photo'+(photos.length>1?'s':'')+')':'(0 photo)';
+  if(!photos||!photos.length){g.innerHTML='<p class="ph-empty">Aucune photo pour le moment. Ajoutez-en ci-dessus !</p>';return}
   g.innerHTML=photos.map(p=>`
-    <div class="ph-item">
+    <div class="ph-item" id="phi-${p.id}">
       <img src="${p.url}" alt="${p.caption||''}" loading="lazy">
-      <button class="ph-del" onclick="delPhoto('${p.id}','${p.path||''}')">✕</button>
-      <div class="ph-cap">${p.caption||''}</div>
+      <button class="ph-del" onclick="delPhoto('${p.id}','${p.path||''}')" title="Supprimer">✕</button>
+      <div class="ph-cap" onclick="editCaption('${p.id}','${(p.caption||'').replace(/'/g,'\\'')}')" title="Cliquez pour modifier le titre" style="cursor:pointer">${p.caption||'+ Ajouter un titre'}</div>
     </div>`).join('');
 }
 
-async function delPhoto(id,path){
-  if(!confirm('Supprimer cette photo définitivement ?'))return;
+async function editCaption(id,currentCap){
+  const newCap=prompt('Titre de la photo :',currentCap);
+  if(newCap===null) return;
+  const {db,ref,set}=window._fb;
   try{
-    const {db,ref,set,storage,sRef,deleteObject}=window._fb;
-    await set(ref(db,`atn/photos/${id}`),null);
-    if(path) await deleteObject(sRef(storage,path)).catch(()=>{});
+    const snap=await window._fb.get(ref(db,'atn/photos/'+id));
+    if(snap.exists()){
+      const data=snap.val();
+      await set(ref(db,'atn/photos/'+id),{...data,caption:newCap});
+    }
+  }catch(e){alert('Erreur : '+e.message)}
+}
+
+async function delPhoto(id,path){
+  if(!confirm('Supprimer cette photo ? Elle sera retirée du site immédiatement.'))return;
+  const {db,ref,set}=window._fb;
+  try{
+    await set(ref(db,'atn/photos/'+id),null);
+    // Note: l'image reste sur Cloudinary mais n'est plus affichée sur le site
   }catch(e){alert('Erreur : '+e.message)}
 }
 
 // ════ CARTE ════
+let qrInstance=null;
+
 function updateCarte(){
   const prenom=document.getElementById('m-prenom').value||'Prénom';
   const nom=document.getElementById('m-nom').value||'Nom';
@@ -753,108 +754,208 @@ function updateCarte(){
   const id=document.getElementById('m-id').value||'ATN-2026-001';
   const annee=document.getElementById('m-annee').value;
   document.getElementById('c-nom').textContent=prenom+' '+nom;
-  document.getElementById('c-type-lbl').textContent=type;
+  document.getElementById('c-type').textContent=type;
   document.getElementById('c-id').textContent='ID: '+id;
   document.getElementById('c-annee').textContent=annee;
 }
 
-function downloadCarte(){
-  const prenom=document.getElementById('m-prenom').value||'Membre';
-  const nom=document.getElementById('m-nom').value||'ATN';
+async function genererCarte(){
+  const prenom=document.getElementById('m-prenom').value.trim();
+  const nom=document.getElementById('m-nom').value.trim();
   const type=document.getElementById('m-type').value;
-  const id=document.getElementById('m-id').value||'ATN-2026-001';
+  const memId=document.getElementById('m-id').value.trim();
   const annee=document.getElementById('m-annee').value;
 
+  if(!prenom||!nom||!memId){alert('Veuillez remplir le prénom, nom et numéro de membre.');return}
+
+  // Enregistrer le membre dans Firebase
+  const {db,ref,set}=window._fb;
+  const dbKey=memId.replace(/[^a-zA-Z0-9-]/g,'_');
+  try{
+    await set(ref(db,'atn/membres/'+dbKey),{
+      id:memId,prenom,nom,type,annee,
+      createdAt:new Date().toISOString()
+    });
+  }catch(e){alert('Erreur enregistrement : '+e.message);return}
+
+  // Générer l'URL de vérification
+  const verifyURL=`${SITE_URL}/verify.html?id=${encodeURIComponent(memId)}`;
+
+  // Générer le QR code dans une div cachée
+  const tempDiv=document.createElement('div');
+  tempDiv.style.cssText='position:absolute;left:-9999px;top:-9999px;width:200px;height:200px';
+  document.body.appendChild(tempDiv);
+
+  await new Promise(resolve=>{
+    new QRCode(tempDiv,{text:verifyURL,width:200,height:200,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+    setTimeout(resolve,500);
+  });
+
+  const qrImg=tempDiv.querySelector('img')||tempDiv.querySelector('canvas');
+  const qrDataUrl=qrImg instanceof HTMLCanvasElement?qrImg.toDataURL():(qrImg?qrImg.src:'');
+  document.body.removeChild(tempDiv);
+
+  // Dessiner la carte
+  downloadCarteWithQR(prenom,nom,type,memId,annee,qrDataUrl,verifyURL);
+
+  document.getElementById('carte-success').style.display='block';
+  setTimeout(()=>document.getElementById('carte-success').style.display='none',5000);
+}
+
+function downloadCarteWithQR(prenom,nom,type,memId,annee,qrDataUrl,verifyURL){
   const W=1280,H=810;
   const cvs=document.createElement('canvas');
   cvs.width=W;cvs.height=H;
-  const c=cvs.getContext('2d');
+  const ctx=cvs.getContext('2d');
 
   // Fond
-  const bg=c.createLinearGradient(0,0,W,H);
+  const bg=ctx.createLinearGradient(0,0,W,H);
   bg.addColorStop(0,'#002D16');bg.addColorStop(.35,'#004D2C');
   bg.addColorStop(.65,'#006B3F');bg.addColorStop(1,'#003A20');
-  c.fillStyle=bg;
-  roundRect(c,0,0,W,H,40);c.fill();
+  ctx.fillStyle=bg;
+  rr(ctx,0,0,W,H,40);ctx.fill();
 
-  // Reflet diagonal
-  c.save();c.globalAlpha=.1;
-  const sh=c.createLinearGradient(W*.3,0,W,H);
-  sh.addColorStop(0,'transparent');sh.addColorStop(.4,'#F9CB15');
-  sh.addColorStop(.7,'#D01221');sh.addColorStop(1,'transparent');
-  c.fillStyle=sh;c.fillRect(0,0,W,H);c.restore();
+  // Reflet
+  ctx.save();ctx.globalAlpha=.1;
+  const sh=ctx.createLinearGradient(W*.3,0,W,H);
+  sh.addColorStop(0,'transparent');sh.addColorStop(.4,'#F9CB15');sh.addColorStop(.7,'#D01221');sh.addColorStop(1,'transparent');
+  ctx.fillStyle=sh;ctx.fillRect(0,0,W,H);ctx.restore();
 
   // Bande drapeau
-  c.fillStyle='#006B3F';c.fillRect(0,0,W/3,14);
-  c.fillStyle='#F9CB15';c.fillRect(W/3,0,W/3,14);
-  c.fillStyle='#D01221';c.fillRect(W*2/3,0,W/3,14);
+  ctx.fillStyle='#006B3F';ctx.fillRect(0,0,W/3,14);
+  ctx.fillStyle='#F9CB15';ctx.fillRect(W/3,0,W/3,14);
+  ctx.fillStyle='#D01221';ctx.fillRect(W*2/3,0,W/3,14);
 
-  // ATN logo
-  c.fillStyle='#F9CB15';
-  c.font='bold 72px Playfair Display, serif';
-  c.fillText('ATN',60,90);
-
-  // Nom association
-  c.fillStyle='rgba(255,255,255,.5)';
-  c.font='500 26px DM Sans, sans-serif';
-  c.fillText('Association des Togolais de Nancy',60,125);
+  // ATN
+  ctx.fillStyle='#F9CB15';ctx.font='bold 72px "Playfair Display",serif';ctx.fillText('ATN',60,90);
+  ctx.fillStyle='rgba(255,255,255,.45)';ctx.font='500 24px "DM Sans",sans-serif';ctx.fillText('Association des Togolais de Nancy',60,122);
 
   // Badge type
-  c.fillStyle='rgba(249,203,21,.15)';
-  c.strokeStyle='rgba(249,203,21,.45)';c.lineWidth=2;
-  const tw=c.measureText(type.toUpperCase()).width+40;
-  c.beginPath();roundRect(c,W-tw-50,28,tw,42,21);c.fill();c.stroke();
-  c.fillStyle='#F9CB15';c.font='bold 20px DM Sans, sans-serif';
-  c.fillText(type.toUpperCase(),W-tw-30,56);
+  ctx.save();
+  const tw=ctx.measureText(type.toUpperCase()).width+44;
+  ctx.fillStyle='rgba(249,203,21,.15)';ctx.strokeStyle='rgba(249,203,21,.45)';ctx.lineWidth=2;
+  ctx.beginPath();rr(ctx,W-tw-50,26,tw,42,21);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#F9CB15';ctx.font='bold 20px "DM Sans",sans-serif';
+  ctx.fillText(type.toUpperCase(),W-tw-30,54);ctx.restore();
 
-  // QR simulé
-  c.fillStyle='#fff';c.beginPath();roundRect(c,60,220,140,140,12);c.fill();
-  const qrPx=[[0,0],[1,0],[2,0],[0,1],[2,1],[0,2],[1,2],[2,2],
-    [4,0],[4,1],[4,2],[3,1],[2,3],[0,4],[1,4],[2,4],[3,4],[4,4]];
-  qrPx.forEach(([qx,qy])=>{c.fillStyle='#000';c.fillRect(68+qx*26,228+qy*26,22,22)});
-  c.fillStyle='rgba(0,0,0,.7)';c.font='bold 16px DM Sans,sans-serif';
-  c.textAlign='center';c.fillText(id,130,378);c.textAlign='left';
+  // QR CODE RÉEL
+  if(qrDataUrl){
+    const qrSize=155;
+    const qrX=60,qrY=215;
+    ctx.fillStyle='#fff';rr(ctx,qrX-8,qrY-8,qrSize+16,qrSize+16,12);ctx.fill();
+    const img=new Image();
+    img.onload=()=>{
+      ctx.drawImage(img,qrX,qrY,qrSize,qrSize);
+      finishCard(ctx,W,H,prenom,nom,memId,annee,verifyURL,qrX,qrY,qrSize);
+      doDownload(cvs,prenom,nom,annee);
+    };
+    img.onerror=()=>{
+      finishCard(ctx,W,H,prenom,nom,memId,annee,verifyURL,qrX,qrY,qrSize);
+      doDownload(cvs,prenom,nom,annee);
+    };
+    img.src=qrDataUrl;
+  } else {
+    finishCard(ctx,W,H,prenom,nom,memId,annee,verifyURL,60,215,155);
+    doDownload(cvs,prenom,nom,annee);
+  }
+}
+
+function finishCard(ctx,W,H,prenom,nom,memId,annee,verifyURL,qrX,qrY,qrSize){
+  // Texte sous QR
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.font='bold 14px monospace';
+  ctx.textAlign='center';ctx.fillText(memId,qrX+qrSize/2,qrY+qrSize+20);ctx.textAlign='left';
 
   // Nom membre
-  c.fillStyle='#fff';
-  c.font='bold 80px Playfair Display, serif';
-  c.fillText(prenom+' '+nom,230,310);
+  ctx.fillStyle='#fff';ctx.font='bold 80px "Playfair Display",serif';
+  ctx.fillText(prenom+' '+nom,248,310);
 
   // ID badge
-  const idbg=c.createLinearGradient(230,330,520,330);
-  idbg.addColorStop(0,'#002D16');idbg.addColorStop(1,'#005A32');
-  c.fillStyle=idbg;
-  c.beginPath();roundRect(c,230,340,280,50,8);c.fill();
-  c.fillStyle='#F9CB15';c.font='bold 26px DM Sans,sans-serif';
-  c.fillText('ID: '+id,250,372);
+  const idb=ctx.createLinearGradient(248,335,520,335);
+  idb.addColorStop(0,'#002D16');idb.addColorStop(1,'#005A32');
+  ctx.fillStyle=idb;rr(ctx,248,338,280,50,8);ctx.fill();
+  ctx.fillStyle='#F9CB15';ctx.font='bold 26px "DM Sans",sans-serif';
+  ctx.fillText('ID: '+memId,268,370);
 
   // Validité
-  c.fillStyle='rgba(255,255,255,.45)';c.font='500 22px DM Sans,sans-serif';
-  c.fillText('VALIDITÉ',60,720);
-  c.fillStyle='#fff';c.font='bold 36px DM Sans,sans-serif';
-  c.fillText(annee,60,760);
+  ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='500 22px "DM Sans",sans-serif';ctx.fillText('VALIDITÉ',60,720);
+  ctx.fillStyle='#fff';ctx.font='bold 36px "DM Sans",sans-serif';ctx.fillText(annee,60,760);
+
+  // URL vérification (petite)
+  ctx.fillStyle='rgba(255,255,255,.25)';ctx.font='500 14px "DM Sans",sans-serif';
+  ctx.fillText('Vérification : '+verifyURL,248,760);
 
   // Sceau
-  const sx=W-100,sy=H-90;
-  const seal=c.createRadialGradient(sx-8,sy-8,0,sx,sy,55);
+  const sx=W-100,sy=H-95;
+  const seal=ctx.createRadialGradient(sx-8,sy-8,0,sx,sy,55);
   seal.addColorStop(0,'#F5D060');seal.addColorStop(.5,'#C8960C');seal.addColorStop(1,'#8B6508');
-  c.fillStyle=seal;
-  c.beginPath();c.arc(sx,sy,55,0,Math.PI*2);c.fill();
-  c.strokeStyle='rgba(255,255,255,.2)';c.lineWidth=2;c.stroke();
-  c.fillStyle='#fff';c.font='bold 36px sans-serif';
-  c.textAlign='center';c.fillText('✓',sx,sy+13);c.textAlign='left';
+  ctx.fillStyle=seal;ctx.beginPath();ctx.arc(sx,sy,55,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font='bold 36px sans-serif';
+  ctx.textAlign='center';ctx.fillText('✓',sx,sy+13);ctx.textAlign='left';
+}
 
+function doDownload(cvs,prenom,nom,annee){
   const a=document.createElement('a');
   a.download=`carte-atn-${prenom}-${nom}-${annee}.png`;
   a.href=cvs.toDataURL('image/png');a.click();
 }
 
-function roundRect(ctx,x,y,w,h,r){
+function rr(ctx,x,y,w,h,r){
   ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
   ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
   ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
   ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
   ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+// ════ MEMBRES LIST ════
+async function loadMembres(){
+  const {db,ref,get}=window._fb;
+  try{
+    const snap=await get(ref(db,'atn/membres'));
+    const membres=snap.exists()?Object.values(snap.val()).filter(Boolean):[];
+    document.getElementById('mb-count').textContent=membres.length;
+    const g=document.getElementById('membres-grid');
+    if(!membres.length){g.innerHTML='<p style="color:var(--gris);font-style:italic">Aucun membre enregistré.</p>';return}
+    const now=new Date().getFullYear();
+    g.innerHTML=membres.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).map(m=>{
+      const valide=parseInt(m.annee)>=now;
+      return`<div class="membre-card">
+        <div class="membre-avatar">👤</div>
+        <div class="membre-info">
+          <div class="membre-nom">${m.prenom} ${m.nom}</div>
+          <div class="membre-detail">${m.id} · ${m.type}</div>
+        </div>
+        <div class="membre-badge ${valide?'':'membre-expired'}">${valide?'✅ '+m.annee:'❌ Expiré'}</div>
+        <button class="membre-del" onclick="delMembre('${m.id.replace(/[^a-zA-Z0-9-]/g,'_')}','${m.prenom} ${m.nom}')" title="Supprimer">🗑</button>
+      </div>`}).join('');
+  }catch(e){console.error(e)}
+}
+
+async function delMembre(dbKey,nom){
+  if(!confirm(`Supprimer le membre "${nom}" ? Sa carte ne sera plus vérifiable.`))return;
+  const {db,ref,set}=window._fb;
+  try{await set(ref(db,'atn/membres/'+dbKey),null);loadMembres()}
+  catch(e){alert('Erreur : '+e.message)}
+}
+
+async function clearSection(section,label){
+  if(!confirm('Êtes-vous sûr de vouloir supprimer '+label+' ? Cette action est irréversible.'))return;
+  const {db,ref,set}=window._fb;
+  const msgId='m-clear-'+section;
+  const msgEl=document.getElementById(msgId);
+  try{
+    if(section==='events') await set(ref(db,'atn/events'),null);
+    else if(section==='photos') await set(ref(db,'atn/photos'),null);
+    else if(section==='popup'){
+      await set(ref(db,'atn/popupTitle'),null);
+      await set(ref(db,'atn/popupText'),null);
+    }
+    else if(section==='reseaux') await set(ref(db,'atn/reseaux'),null);
+    if(msgEl){msgEl.textContent='✅ Supprimé avec succès !';msgEl.className='save-msg ok';msgEl.style.display='inline';setTimeout(()=>msgEl.style.display='none',3000)}
+  }catch(e){
+    if(msgEl){msgEl.textContent='❌ Erreur : '+e.message;msgEl.className='save-msg err';msgEl.style.display='inline';}
+  }
 }
 </script>
 </body>
