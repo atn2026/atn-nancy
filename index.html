@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ATN — Association des Togolais de Nancy</title>
-<meta name="description" content="L'Association des Togolais de Nancy rassemble la communauté togolaise et sympathisants en Lorraine. Culture, solidarité, entraide.">
+<meta name="description" content="L'Association des Togolais de Nancy — Culture, solidarité et entraide en Lorraine.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -21,472 +20,481 @@
   };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  onValue(ref(db, 'atn'), (snap) => {
+  onValue(ref(db, 'atn'), snap => {
     const d = snap.val();
-    if (d) applyData(d);
-    else { renderEvents(defaultEvents); renderGallery([]); }
-  }, () => { renderEvents(defaultEvents); renderGallery([]); });
+    if (d) applyData(d); else initDefaults();
+  }, () => initDefaults());
 </script>
-
 <style>
 :root {
-  --vert:#006B3F; --rouge:#D01221; --jaune:#F9CB15; --or:#C8960C;
-  --noir:#0F0E0B; --blanc:#FAFAF5; --creme:#F4F1E8; --gris:#7A7870;
-  --vert-pale:#E8F4EF; --vert-fonce:#004D2C;
+  --vert:#006B3F; --rouge:#D01221; --jaune:#F9CB15;
+  --noir:#0D0D0B; --blanc:#FAFAF5; --creme:#F3F0E6;
+  --gris:#7A7870; --vert-pale:#E8F4EF; --vert-fonce:#004D2C;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--blanc);color:var(--noir);overflow-x:hidden}
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(15,14,11,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,150,12,0.25);display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:68px}
-.nav-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--jaune);letter-spacing:0.04em;text-decoration:none;display:flex;align-items:center;gap:0.5rem}
-.nav-logo-flag{display:flex;flex-direction:column;width:5px;height:20px;border-radius:3px;overflow:hidden}
-.nav-logo-flag div{flex:1}
-.nav-logo span{color:var(--vert)}
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:68px;
+  background:rgba(13,13,11,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(249,203,21,0.12);
+  display:flex;align-items:center;justify-content:space-between;padding:0 5vw}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-flag{display:flex;flex-direction:column;width:6px;height:22px;border-radius:3px;overflow:hidden;gap:1px}
+.logo-flag div{flex:1}
+.logo-text{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--jaune)}
+.logo-text span{color:var(--vert)}
 .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
-.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;transition:color 0.2s}
+.nav-links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:color .2s}
 .nav-links a:hover{color:var(--jaune)}
-.nav-cta{background:var(--vert)!important;color:#fff!important;padding:0.5rem 1.25rem;border-radius:6px;transition:background 0.2s!important}
+.nav-cta{background:var(--vert)!important;color:#fff!important;padding:.45rem 1.2rem;border-radius:6px}
 .nav-cta:hover{background:var(--vert-fonce)!important}
 
-/* POPUP BIENVENUE */
-#popup-bienvenue{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem}
-#popup-bienvenue.show{display:flex}
-.popup-card{background:var(--noir);border:1px solid rgba(249,203,21,0.3);border-radius:20px;max-width:480px;width:100%;overflow:hidden;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)}
-.popup-flag{display:flex;height:5px}
-.popup-flag .pf1{flex:1;background:var(--vert)}.popup-flag .pf2{flex:1;background:var(--jaune)}.popup-flag .pf3{flex:1;background:var(--rouge)}
-.popup-body{padding:2.5rem}
-.popup-emoji{font-size:2.5rem;margin-bottom:1rem}
-.popup-title{font-family:'Playfair Display',serif;font-size:1.6rem;color:#fff;margin-bottom:0.75rem}
-.popup-text{color:rgba(255,255,255,0.6);line-height:1.7;font-size:0.95rem;margin-bottom:1.5rem}
-.popup-event{background:rgba(249,203,21,0.08);border:1px solid rgba(249,203,21,0.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:none}
-.popup-event-label{font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--jaune);margin-bottom:0.4rem}
-.popup-event-name{color:#fff;font-weight:600;font-size:1.05rem}
-.popup-event-info{color:rgba(255,255,255,0.5);font-size:0.85rem;margin-top:0.2rem}
-.popup-actions{display:flex;gap:0.75rem}
-.popup-btn-primary{flex:1;background:var(--vert);color:#fff;border:none;padding:0.85rem;border-radius:8px;font-size:0.95rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s}
-.popup-btn-primary:hover{background:var(--vert-fonce)}
-.popup-btn-secondary{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15);padding:0.85rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s}
-.popup-btn-secondary:hover{background:rgba(255,255,255,0.12)}
+/* ── POPUP ── */
+#popup{display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  align-items:center;justify-content:center;padding:1.5rem}
+#popup.show{display:flex;animation:fadeIn .3s ease}
+.popup-box{background:var(--noir);border-radius:22px;overflow:hidden;
+  max-width:460px;width:100%;box-shadow:0 40px 80px rgba(0,0,0,.6);
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.popup-stripe{height:5px;display:flex}
+.popup-stripe div{flex:1}
+.popup-inner{padding:2.5rem}
+.popup-tag{display:inline-flex;align-items:center;gap:6px;
+  background:rgba(249,203,21,0.1);border:1px solid rgba(249,203,21,0.25);
+  color:var(--jaune);font-size:.7rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding:.3rem .8rem;border-radius:100px;margin-bottom:1.25rem}
+.popup-h{font-family:'Playfair Display',serif;font-size:1.65rem;color:#fff;margin-bottom:.75rem;line-height:1.2}
+.popup-p{color:rgba(255,255,255,.55);font-size:.9rem;line-height:1.7;margin-bottom:1.5rem}
+.popup-event-box{background:rgba(249,203,21,.07);border:1px solid rgba(249,203,21,.2);
+  border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:none}
+.popup-event-lbl{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--jaune);margin-bottom:.35rem}
+.popup-event-name{color:#fff;font-weight:600;font-size:1rem}
+.popup-event-det{color:rgba(255,255,255,.45);font-size:.82rem;margin-top:.2rem}
+.popup-btns{display:flex;gap:.75rem}
+.pbtn-p{flex:1;background:var(--vert);color:#fff;border:none;padding:.85rem;
+  border-radius:8px;font-weight:600;font-size:.95rem;font-family:'DM Sans',sans-serif;cursor:pointer}
+.pbtn-s{background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.12);padding:.85rem 1.25rem;border-radius:8px;
+  font-size:.9rem;font-family:'DM Sans',sans-serif;cursor:pointer}
 
-/* HERO */
-#accueil{min-height:100vh;background:var(--noir);display:flex;align-items:center;position:relative;overflow:hidden;padding-top:68px}
-.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(0,107,63,0.4) 0%,transparent 70%),radial-gradient(ellipse 50% 80% at 10% 80%,rgba(208,18,33,0.2) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 90% 10%,rgba(249,203,21,0.15) 0%,transparent 60%)}
-.hero-pattern{position:absolute;inset:0;opacity:0.03;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,var(--jaune) 39px,var(--jaune) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,var(--jaune) 39px,var(--jaune) 40px)}
-.hero-content{position:relative;z-index:2;padding:0 5vw;max-width:780px}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(249,203,21,0.1);border:1px solid rgba(249,203,21,0.3);color:var(--jaune);font-size:0.75rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;border-radius:100px;margin-bottom:2rem;animation:fadeUp 0.6s ease both}
-.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--jaune);flex-shrink:0;animation:pulse 2s infinite}
-.hero-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,7vw,5.5rem);line-height:1.05;color:var(--blanc);margin-bottom:1.5rem;animation:fadeUp 0.6s 0.1s ease both}
-.hero-title em{color:var(--vert);font-style:italic}
-.hero-title strong{color:var(--jaune)}
-.hero-sub{font-size:1.1rem;color:rgba(255,255,255,0.6);line-height:1.7;max-width:520px;margin-bottom:2.5rem;animation:fadeUp 0.6s 0.2s ease both}
-.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp 0.6s 0.3s ease both}
-.btn-primary{background:var(--vert);color:#fff;padding:0.85rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.95rem;transition:all 0.2s;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Sans',sans-serif}
-.btn-primary:hover{background:var(--vert-fonce);transform:translateY(-2px)}
-.btn-secondary{background:transparent;color:rgba(255,255,255,0.8);padding:0.85rem 2rem;border-radius:8px;text-decoration:none;font-weight:500;font-size:0.95rem;border:1px solid rgba(255,255,255,0.2);transition:all 0.2s}
-.btn-secondary:hover{border-color:var(--jaune);color:var(--jaune)}
-.hero-flag{position:absolute;right:5vw;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;height:300px;width:10px;border-radius:10px;overflow:hidden;box-shadow:0 0 30px rgba(249,203,21,0.2)}
-.hero-flag .f1{flex:1;background:var(--vert)}.hero-flag .f2{flex:1;background:var(--jaune)}.hero-flag .f3{flex:1;background:var(--rouge)}
-.hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.3);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;animation:fadeIn 1.5s ease both}
-.hero-scroll-line{width:1px;height:40px;background:linear-gradient(transparent,rgba(255,255,255,0.3));animation:scrollLine 1.5s ease infinite}
+/* ── HERO ── */
+#hero{min-height:100vh;background:var(--noir);display:flex;align-items:center;
+  position:relative;overflow:hidden;padding-top:68px}
+.hero-bg{position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 75% 50%,rgba(0,107,63,.45) 0%,transparent 70%),
+  radial-gradient(ellipse 45% 70% at 5% 80%,rgba(208,18,33,.2) 0%,transparent 60%),
+  radial-gradient(ellipse 35% 40% at 90% 8%,rgba(249,203,21,.15) 0%,transparent 60%)}
+.hero-grid{position:absolute;inset:0;opacity:.025;
+  background-image:linear-gradient(rgba(249,203,21,1) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(249,203,21,1) 1px,transparent 1px);
+  background-size:60px 60px}
+.hero-inner{position:relative;z-index:2;padding:0 5vw;max-width:820px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(249,203,21,.1);border:1px solid rgba(249,203,21,.3);
+  color:var(--jaune);font-size:.72rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;padding:.4rem 1rem;border-radius:100px;
+  margin-bottom:2.2rem;animation:fadeUp .6s ease both}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--jaune);animation:blink 2s infinite}
+.hero-h{font-family:'Playfair Display',serif;
+  font-size:clamp(3.2rem,7vw,6rem);line-height:1.03;color:var(--blanc);
+  margin-bottom:1.5rem;animation:fadeUp .6s .1s ease both}
+.hero-h em{color:var(--vert);font-style:italic}
+.hero-h strong{color:var(--jaune)}
+.hero-p{font-size:1.1rem;color:rgba(255,255,255,.55);line-height:1.75;
+  max-width:540px;margin-bottom:2.75rem;animation:fadeUp .6s .2s ease both}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
+.btn{padding:.9rem 2rem;border-radius:8px;text-decoration:none;
+  font-weight:600;font-size:.95rem;transition:all .2s;display:inline-flex;
+  align-items:center;gap:.5rem;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-g{background:var(--vert);color:#fff}
+.btn-g:hover{background:var(--vert-fonce);transform:translateY(-2px)}
+.btn-o{background:transparent;color:rgba(255,255,255,.8);
+  border:1.5px solid rgba(255,255,255,.2)}
+.btn-o:hover{border-color:var(--jaune);color:var(--jaune)}
+.hero-drapeau{position:absolute;right:5vw;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;width:11px;height:320px;border-radius:10px;
+  overflow:hidden;box-shadow:0 0 40px rgba(0,107,63,.25)}
+.hero-drapeau .d1{flex:1;background:var(--vert)}
+.hero-drapeau .d2{flex:1;background:var(--jaune)}
+.hero-drapeau .d3{flex:1;background:var(--rouge)}
 
-/* SECTIONS */
+/* ── SECTIONS ── */
 section{padding:6rem 5vw}
-.section-label{font-size:0.72rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--vert);margin-bottom:0.75rem;display:block}
-.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:700;line-height:1.2;margin-bottom:1.25rem}
-.section-sub{color:var(--gris);font-size:1.05rem;line-height:1.7;max-width:560px}
+.s-label{font-size:.7rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--vert);margin-bottom:.7rem;display:block}
+.s-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);
+  font-weight:700;line-height:1.15;margin-bottom:1.2rem}
+.s-sub{color:var(--gris);font-size:1rem;line-height:1.75;max-width:560px}
 
-/* APROPOS */
+/* ── APROPOS ── */
 #apropos{background:var(--creme)}
-.apropos-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:3.5rem}
-.apropos-text p{color:#3a3832;line-height:1.8;margin-bottom:1rem;font-size:1.025rem}
-.apropos-stats{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-.stat-card{background:#fff;border:1px solid rgba(0,107,63,0.12);border-radius:14px;padding:1.75rem 1.5rem;text-align:center;transition:all 0.3s}
-.stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,107,63,0.1)}
-.stat-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--vert);line-height:1}
-.stat-label{font-size:0.85rem;color:var(--gris);margin-top:0.4rem;font-weight:500}
+.apropos-layout{display:grid;grid-template-columns:1.1fr 1fr;gap:5rem;
+  align-items:center;margin-top:3.5rem}
+.apropos-text p{color:#3a3832;line-height:1.85;margin-bottom:1rem;font-size:1rem}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.stat{background:#fff;border:1px solid rgba(0,107,63,.1);border-radius:16px;
+  padding:1.75rem 1.5rem;text-align:center;transition:all .3s}
+.stat:hover{transform:translateY(-5px);box-shadow:var(--card-shadow)}
+.stat-n{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;
+  color:var(--vert);line-height:1}
+.stat-l{font-size:.82rem;color:var(--gris);margin-top:.35rem;font-weight:500}
 
-/* ACTIVITÉS */
+/* ── ACTIVITÉS ── */
 #activites{background:var(--blanc)}
-.activites-intro{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:2rem;margin-bottom:3rem}
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
-.card{background:var(--blanc);border:1px solid #E8E5DC;border-radius:18px;overflow:hidden;transition:all 0.3s}
-.card:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,107,63,0.12);border-color:rgba(0,107,63,0.3)}
-.card-icon{background:var(--vert-pale);height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem}
-.card-icon.rouge{background:#FFF0F1}.card-icon.or{background:#FFFAEB}
-.card-body{padding:1.5rem}
-.card-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;margin-bottom:0.6rem}
-.card-text{color:var(--gris);font-size:0.9rem;line-height:1.7}
+.act-header{display:flex;justify-content:space-between;align-items:flex-end;
+  flex-wrap:wrap;gap:2rem;margin-bottom:3rem}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1.5rem}
+.act-card{background:#fff;border:1px solid #ECEAE0;border-radius:20px;
+  overflow:hidden;transition:all .3s}
+.act-card:hover{transform:translateY(-8px);
+  box-shadow:0 24px 60px rgba(0,107,63,.12);border-color:rgba(0,107,63,.25)}
+.act-icon{height:110px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.act-icon.v{background:#E8F4EF}.act-icon.r{background:#FFF0F1}.act-icon.y{background:#FFFAEB}
+.act-body{padding:1.5rem}
+.act-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;margin-bottom:.6rem}
+.act-text{color:var(--gris);font-size:.88rem;line-height:1.7}
 
-/* GALERIE */
-#galerie{background:var(--noir);padding:6rem 5vw}
-#galerie .section-label{color:rgba(249,203,21,0.7)}
-#galerie .section-title{color:#fff}
-#galerie .section-sub{color:rgba(255,255,255,0.5)}
-.galerie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:3rem}
-.galerie-item{border-radius:14px;overflow:hidden;position:relative;aspect-ratio:4/3;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s}
-.galerie-item:hover{transform:scale(1.03);border-color:rgba(249,203,21,0.3)}
-.galerie-item img{width:100%;height:100%;object-fit:cover;display:block}
-.galerie-placeholder{font-size:3rem;opacity:0.4}
-.galerie-overlay{position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,0.85));opacity:0;transition:opacity 0.3s;display:flex;align-items:flex-end;padding:1.25rem}
-.galerie-item:hover .galerie-overlay{opacity:1}
-.galerie-caption{color:#fff;font-weight:600;font-size:0.95rem;line-height:1.3}
-.galerie-sub{color:rgba(255,255,255,0.6);font-size:0.78rem;margin-top:0.25rem}
+/* ── GALERIE ── */
+#galerie{background:var(--noir)}
+#galerie .s-label{color:rgba(249,203,21,.6)}
+#galerie .s-title{color:#fff}
+#galerie .s-sub{color:rgba(255,255,255,.4)}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px;margin-top:3rem}
+.gal-item{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:4/3;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s}
+.gal-item:hover{transform:scale(1.03);border-color:rgba(249,203,21,.3);
+  box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.gal-item img{width:100%;height:100%;object-fit:cover}
+.gal-placeholder{font-size:3.5rem;opacity:.3}
+.gal-overlay{position:absolute;inset:0;
+  background:linear-gradient(transparent 35%,rgba(0,0,0,.85));
+  opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:1.25rem}
+.gal-item:hover .gal-overlay{opacity:1}
+.gal-title{color:#fff;font-weight:600;font-size:.95rem}
+.gal-sub{color:rgba(255,255,255,.55);font-size:.78rem;margin-top:.2rem}
+.gal-empty{color:rgba(255,255,255,.25);text-align:center;padding:4rem;
+  grid-column:1/-1;font-style:italic}
 
-/* LIGHTBOX */
-#lightbox{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:2rem}
-#lightbox.show{display:flex}
-#lightbox img{max-width:90vw;max-height:85vh;border-radius:12px;object-fit:contain}
-#lightbox-close{position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,0.1);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;transition:all 0.2s}
-#lightbox-close:hover{background:rgba(208,18,33,0.7)}
-#lightbox-caption{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);color:#fff;font-weight:600;font-size:1rem;text-align:center;background:rgba(0,0,0,0.5);padding:0.5rem 1.5rem;border-radius:100px}
+/* ── LIGHTBOX ── */
+#lb{display:none;position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,.96);align-items:center;justify-content:center;padding:2rem}
+#lb.show{display:flex}
+#lb img{max-width:90vw;max-height:85vh;border-radius:14px;object-fit:contain}
+#lb-close{position:absolute;top:1.5rem;right:1.5rem;width:44px;height:44px;
+  border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;
+  font-size:1.2rem;cursor:pointer;transition:all .2s}
+#lb-close:hover{background:var(--rouge)}
+#lb-cap{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  color:#fff;font-weight:600;font-size:1rem;text-align:center;
+  background:rgba(0,0,0,.5);padding:.5rem 1.5rem;border-radius:100px;white-space:nowrap}
 
-/* AGENDA */
+/* ── AGENDA ── */
 #agenda{background:var(--creme)}
-.events-list{margin-top:3rem;display:flex;flex-direction:column;gap:1px}
-.event-item{display:grid;grid-template-columns:80px 1fr auto;align-items:center;gap:2rem;padding:1.5rem 1rem;border-bottom:1px solid #E8E5DC;transition:all 0.2s;border-radius:10px}
-.event-item:hover{background:#fff;padding-left:1.5rem;box-shadow:0 4px 20px rgba(0,107,63,0.08)}
-.event-date{text-align:center;background:var(--vert-pale);border:1px solid rgba(0,107,63,0.15);border-radius:10px;padding:0.75rem}
-.event-day{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--vert);line-height:1}
-.event-month{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gris)}
-.event-name{font-weight:600;font-size:1.05rem;margin-bottom:0.2rem}
-.event-location{font-size:0.85rem;color:var(--gris)}
-.event-badge{font-size:0.72rem;font-weight:600;letter-spacing:0.08em;padding:0.3rem 0.8rem;border-radius:100px;text-transform:uppercase;white-space:nowrap}
-.badge-culture{background:rgba(0,107,63,0.1);color:var(--vert-fonce)}
-.badge-social{background:rgba(201,150,12,0.15);color:var(--or)}
-.badge-sport{background:rgba(208,18,33,0.1);color:var(--rouge)}
-.badge-solidarite{background:#F0EDE4;color:var(--gris)}
-.no-events{color:var(--gris);font-style:italic;padding:2rem 0}
+.events{margin-top:3rem;display:flex;flex-direction:column;gap:2px}
+.ev{display:grid;grid-template-columns:80px 1fr auto;align-items:center;
+  gap:2rem;padding:1.5rem 1.25rem;border-radius:14px;transition:all .2s;
+  border:1px solid transparent}
+.ev:hover{background:#fff;border-color:#E8E5DC;
+  box-shadow:var(--card-shadow);padding-left:1.75rem}
+.ev-date{text-align:center;background:var(--vert-pale);
+  border:1px solid rgba(0,107,63,.15);border-radius:12px;padding:.75rem .5rem}
+.ev-day{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;
+  color:var(--vert);line-height:1}
+.ev-month{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gris)}
+.ev-name{font-weight:600;font-size:1.05rem;margin-bottom:.25rem}
+.ev-loc{font-size:.85rem;color:var(--gris)}
+.ev-badge{font-size:.68rem;font-weight:700;letter-spacing:.08em;
+  padding:.35rem .9rem;border-radius:100px;text-transform:uppercase;white-space:nowrap}
+.bc{background:rgba(0,107,63,.1);color:var(--vert-fonce)}
+.bs{background:rgba(201,150,12,.12);color:#7A5C0A}
+.bsp{background:rgba(208,18,33,.1);color:#8B0A14}
+.bso{background:#F0EDE4;color:var(--gris)}
 
-/* REJOINDRE */
-#rejoindre{background:linear-gradient(135deg,var(--vert-fonce) 0%,var(--vert) 100%);color:#fff;text-align:center}
-#rejoindre .section-label{color:var(--jaune)}
-#rejoindre .section-title{color:#fff}
-.rejoindre-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;max-width:900px;margin:2rem auto 0}
-.rcard{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:2rem 1.5rem;text-align:center;transition:all 0.3s}
-.rcard:hover{background:rgba(255,255,255,0.18);transform:translateY(-6px)}
-.rcard-icon{font-size:2.2rem;margin-bottom:1rem}
-.rcard-title{font-weight:600;font-size:1rem;margin-bottom:0.5rem}
-.rcard-text{font-size:0.85rem;color:rgba(255,255,255,0.65);line-height:1.6}
+/* ── REJOINDRE ── */
+#rejoindre{background:linear-gradient(135deg,var(--vert-fonce),var(--vert));
+  color:#fff;text-align:center}
+#rejoindre .s-label{color:var(--jaune)}
+#rejoindre .s-title{color:#fff}
+#rejoindre .s-sub{color:rgba(255,255,255,.6);margin:0 auto 3rem}
+.rj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:1.5rem;max-width:920px;margin:0 auto}
+.rj-card{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.15);border-radius:18px;
+  padding:2rem 1.5rem;transition:all .3s}
+.rj-card:hover{background:rgba(255,255,255,.18);transform:translateY(-6px)}
+.rj-icon{font-size:2.2rem;margin-bottom:1rem}
+.rj-title{font-weight:600;font-size:1rem;margin-bottom:.5rem}
+.rj-text{font-size:.84rem;color:rgba(255,255,255,.6);line-height:1.6}
 
-/* CARTE ADHESION */
-#adhesion{background:var(--blanc);padding:6rem 5vw}
-.adhesion-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;margin-top:3rem}
-.adhesion-form-card{background:var(--creme);border-radius:18px;padding:2.5rem}
-.adhesion-form-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:1.5rem}
-.afield{margin-bottom:1.1rem}
-.afield label{display:block;font-size:0.82rem;font-weight:600;margin-bottom:0.35rem}
-.afield input,.afield select{width:100%;padding:0.75rem 1rem;border:1.5px solid #DDD9CE;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:#fff;-webkit-appearance:none;transition:border-color 0.2s}
-.afield input:focus,.afield select:focus{outline:none;border-color:var(--vert)}
-.afield-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.gen-btn{width:100%;padding:0.9rem;background:var(--vert);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;margin-top:0.5rem}
-.gen-btn:hover{background:var(--vert-fonce)}
+/* ── CONTACT ── */
+#contact{background:var(--blanc)}
+.contact-layout{display:grid;grid-template-columns:1fr 1.3fr;gap:5rem;
+  margin-top:3.5rem;align-items:start}
+.cinfo{display:flex;flex-direction:column;gap:1.75rem}
+.cblock{display:flex;gap:1.2rem;align-items:flex-start}
+.cicon{width:46px;height:46px;background:var(--vert-pale);
+  border:1px solid rgba(0,107,63,.12);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.cdet p:first-child{font-weight:700;font-size:.82rem;color:var(--vert);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:.2rem}
+.cdet p:last-child,.cdet div{color:var(--gris);font-size:.95rem;line-height:1.5}
+.cdet a{color:var(--vert);text-decoration:none}
+.cdet a:hover{text-decoration:underline}
+.socials{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem}
+.sbtn{display:inline-flex;align-items:center;gap:.4rem;
+  padding:.5rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;
+  text-decoration:none;color:#fff;transition:all .2s}
+.sbtn:hover{opacity:.85;transform:translateY(-1px)}
+.cform{background:var(--creme);border-radius:20px;padding:2.5rem}
+.cf-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:.4rem}
+.cf-sub{color:var(--gris);font-size:.88rem;margin-bottom:2rem}
+.fg{margin-bottom:1.2rem}
+.fg label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem}
+.fg input,.fg textarea,.fg select{width:100%;padding:.75rem 1rem;
+  border:1.5px solid #DDD9CE;border-radius:8px;background:#fff;
+  font-family:'DM Sans',sans-serif;font-size:.9rem;
+  color:var(--noir);transition:border-color .2s;-webkit-appearance:none}
+.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--vert)}
+.fg textarea{resize:vertical;min-height:110px}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fsub{width:100%;padding:.9rem;background:var(--vert);color:#fff;border:none;
+  border-radius:8px;font-size:1rem;font-weight:600;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all .2s}
+.fsub:hover{background:var(--vert-fonce)}
+.fsuccess{display:none;color:var(--vert);font-weight:600;text-align:center;
+  padding:1rem;background:var(--vert-pale);border-radius:8px;margin-top:1rem}
 
-/* CARTE PREVIEW */
-.carte-preview-wrap{position:sticky;top:90px}
-.carte-preview-label{font-size:0.75rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gris);margin-bottom:1rem}
-.carte{background:linear-gradient(135deg,#004D2C 0%,#006B3F 40%,#008F52 70%,#004D2C 100%);border-radius:16px;padding:0;overflow:hidden;position:relative;aspect-ratio:85.6/54;box-shadow:0 20px 60px rgba(0,107,63,0.4);width:100%;max-width:420px}
-.carte-wave{position:absolute;top:0;right:0;width:60%;height:100%;background:linear-gradient(135deg,transparent 30%,rgba(249,203,21,0.15) 50%,rgba(208,18,33,0.1) 70%,transparent 90%)}
-.carte-stripe{position:absolute;top:0;left:0;right:0;height:6px;display:flex}
-.carte-stripe .s1{flex:1;background:var(--vert)}.carte-stripe .s2{flex:1;background:var(--jaune)}.carte-stripe .s3{flex:1;background:var(--rouge)}
-.carte-body{position:relative;z-index:2;padding:1.25rem 1.5rem;height:100%;display:flex;flex-direction:column;justify-content:space-between}
-.carte-header{display:flex;justify-content:space-between;align-items:flex-start}
-.carte-asso{font-family:'Playfair Display',serif;font-size:0.8rem;color:rgba(255,255,255,0.9);line-height:1.2}
-.carte-asso strong{color:var(--jaune);font-size:0.95rem;display:block}
-.carte-type{background:rgba(249,203,21,0.2);border:1px solid rgba(249,203,21,0.4);color:var(--jaune);font-size:0.55rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:100px;white-space:nowrap}
-.carte-middle{display:flex;align-items:center;gap:1rem}
-.carte-qr{width:52px;height:52px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.4rem;font-weight:700;color:#000;text-align:center;padding:4px;line-height:1.1}
-.carte-info{}
-.carte-nom{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#fff;line-height:1.1}
-.carte-id{background:linear-gradient(90deg,var(--vert-fonce),var(--vert));color:var(--jaune);font-size:0.65rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:4px;display:inline-block;margin-top:0.3rem;letter-spacing:0.05em}
-.carte-footer{display:flex;justify-content:space-between;align-items:flex-end}
-.carte-validite{color:rgba(255,255,255,0.7);font-size:0.65rem}
-.carte-validite strong{color:#fff;font-size:0.75rem;display:block}
-.carte-sceau{width:36px;height:36px;background:radial-gradient(circle,#F5D060,#C8960C,#8B6508);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
-.download-btn{display:block;width:100%;max-width:420px;margin-top:1rem;padding:0.8rem;background:var(--noir);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;text-align:center}
-.download-btn:hover{background:var(--vert)}
+/* ── FOOTER ── */
+footer{background:var(--noir);border-top:1px solid rgba(249,203,21,.12)}
+.ft-stripe{display:flex;height:4px}
+.ft-stripe .fs1{flex:1;background:var(--vert)}
+.ft-stripe .fs2{flex:1;background:var(--jaune)}
+.ft-stripe .fs3{flex:1;background:var(--rouge)}
+.ft-inner{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:4rem;
+  padding:4rem 5vw;border-bottom:1px solid rgba(255,255,255,.05)}
+.ft-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;
+  color:var(--jaune);display:block;margin-bottom:.6rem}
+.ft-logo span{color:var(--vert)}
+.ft-tag{font-size:.88rem;color:rgba(255,255,255,.3);line-height:1.6;
+  margin-bottom:1.5rem;font-style:italic}
+.ft-socials{display:flex;gap:.5rem;flex-wrap:wrap}
+.ft-sbtn{width:36px;height:36px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;font-size:.95rem;
+  text-decoration:none;transition:all .2s}
+.ft-sbtn:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+.ft-col{display:flex;flex-direction:column;gap:.55rem}
+.ft-col-title{font-size:.68rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--jaune);margin-bottom:.4rem}
+.ft-col a{color:rgba(255,255,255,.38);text-decoration:none;font-size:.85rem;transition:color .2s}
+.ft-col a:hover{color:var(--jaune)}
+.ft-bottom{font-size:.78rem;color:rgba(255,255,255,.25);
+  padding:1.5rem 5vw;text-align:center}
+.ft-bottom a{color:rgba(255,255,255,.3);text-decoration:none}
+.ft-bottom a:hover{color:var(--jaune)}
 
-/* CONTACT */
-#contact{background:var(--creme)}
-.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:5rem;margin-top:3.5rem;align-items:start}
-.contact-info{display:flex;flex-direction:column;gap:1.5rem}
-.contact-block{display:flex;gap:1.2rem;align-items:flex-start}
-.contact-icon{width:44px;height:44px;background:#fff;border:1px solid rgba(0,107,63,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
-.contact-detail p:first-child{font-weight:600;font-size:0.9rem;color:var(--vert);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem}
-.contact-detail p:last-child,.contact-detail div{color:var(--gris);font-size:0.95rem}
-.contact-detail a{color:var(--vert);text-decoration:none}
-.social-links{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.5rem}
-.social-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.55rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none;transition:all 0.2s;color:#fff}
-.contact-form-card{background:#fff;border-radius:18px;padding:2.5rem;border:1px solid #E8E5DC}
-.form-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:0.5rem}
-.form-sub{color:var(--gris);font-size:0.9rem;margin-bottom:2rem}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.form-group{margin-bottom:1.25rem}
-.form-group label{display:block;font-size:0.82rem;font-weight:600;color:var(--noir);margin-bottom:0.4rem}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:0.75rem 1rem;border:1.5px solid #DDD9CE;border-radius:8px;background:#fff;font-family:'DM Sans',sans-serif;font-size:0.925rem;color:var(--noir);transition:border-color 0.2s;-webkit-appearance:none}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--vert)}
-.form-group textarea{resize:vertical;min-height:110px}
-.form-submit{width:100%;padding:0.9rem;background:var(--vert);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s}
-.form-submit:hover{background:var(--vert-fonce)}
-.form-success{display:none;color:var(--vert);font-weight:600;text-align:center;padding:1rem;background:var(--vert-pale);border-radius:8px;margin-top:1rem}
-
-/* FOOTER */
-footer{background:var(--noir);color:rgba(255,255,255,0.5);border-top:1px solid rgba(249,203,21,0.15)}
-.footer-flag{display:flex;height:4px}
-.footer-flag .ff1{flex:1;background:var(--vert)}.footer-flag .ff2{flex:1;background:var(--jaune)}.footer-flag .ff3{flex:1;background:var(--rouge)}
-.footer-inner{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:4rem;padding:4rem 5vw;border-bottom:1px solid rgba(255,255,255,0.06)}
-.footer-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--jaune);display:block;margin-bottom:0.75rem}
-.footer-logo span{color:var(--vert)}
-.footer-tagline{font-size:0.9rem;color:rgba(255,255,255,0.35);line-height:1.6;margin-bottom:1.5rem;font-style:italic}
-.footer-social{display:flex;gap:0.6rem;flex-wrap:wrap}
-.footer-social-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;text-decoration:none;transition:all 0.2s}
-.footer-social-btn:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px)}
-.footer-links-col{display:flex;flex-direction:column;gap:0.6rem}
-.footer-col-title{font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--jaune);margin-bottom:0.5rem}
-.footer-links-col a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:0.88rem;transition:color 0.2s}
-.footer-links-col a:hover{color:var(--jaune)}
-.footer-bottom{font-size:0.8rem;padding:1.5rem 5vw;text-align:center}
-.footer-bottom a{color:rgba(255,255,255,0.35);text-decoration:none}
-.footer-bottom a:hover{color:var(--jaune)}
-
-/* ANIMATIONS */
+/* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes popIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-@keyframes scrollLine{0%{opacity:0;transform:scaleY(0);transform-origin:top}50%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1);transform-origin:bottom}}
-.reveal{opacity:0;transform:translateY(30px);transition:all 0.7s cubic-bezier(0.4,0,0.2,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.reveal{opacity:0;transform:translateY(28px);transition:all .7s cubic-bezier(.4,0,.2,1)}
 .reveal.visible{opacity:1;transform:none}
 
+/* ── RESPONSIVE ── */
 @media(max-width:768px){
-  .nav-links{display:none}.hero-flag{display:none}
-  .apropos-grid,.contact-grid,.adhesion-grid,.footer-inner{grid-template-columns:1fr;gap:2.5rem}
-  .form-row,.afield-row{grid-template-columns:1fr}
-  .event-item{grid-template-columns:60px 1fr}.event-badge{display:none}
-  .footer-inner{padding:2.5rem 5vw}
+  .nav-links{display:none}
+  .hero-drapeau,.hero-actions .btn-o{display:none}
+  .apropos-layout,.contact-layout,.ft-inner{grid-template-columns:1fr;gap:2.5rem}
+  .fg-row{grid-template-columns:1fr}
+  .ev{grid-template-columns:60px 1fr}.ev-badge{display:none}
+  .ft-inner{padding:2.5rem 5vw}
 }
 </style>
 </head>
 <body>
 
-<!-- POPUP BIENVENUE -->
-<div id="popup-bienvenue">
-  <div class="popup-card">
-    <div class="popup-flag"><div class="pf1"></div><div class="pf2"></div><div class="pf3"></div></div>
-    <div class="popup-body">
-      <div class="popup-emoji">🇹🇬</div>
-      <h2 class="popup-title" id="popup-title">Bienvenue sur le site de l'ATN !</h2>
-      <p class="popup-text" id="popup-text">L'Association des Togolais de Nancy vous souhaite la bienvenue. Découvrez notre communauté, nos activités et rejoignez-nous !</p>
-      <div class="popup-event" id="popup-event">
-        <div class="popup-event-label">🗓 Prochain événement</div>
-        <div class="popup-event-name" id="popup-event-name"></div>
-        <div class="popup-event-info" id="popup-event-info"></div>
+<!-- POPUP -->
+<div id="popup">
+  <div class="popup-box">
+    <div class="popup-stripe">
+      <div style="background:var(--vert)"></div>
+      <div style="background:var(--jaune)"></div>
+      <div style="background:var(--rouge)"></div>
+    </div>
+    <div class="popup-inner">
+      <div class="popup-tag">🇹🇬 Association des Togolais de Nancy</div>
+      <h2 class="popup-h" id="pp-title">Bienvenue sur le site de l'ATN !</h2>
+      <p class="popup-p" id="pp-text">Découvrez notre communauté togolaise à Nancy — culture, solidarité et entraide au cœur de la Lorraine.</p>
+      <div class="popup-event-box" id="pp-event">
+        <div class="popup-event-lbl">🗓 Prochain événement</div>
+        <div class="popup-event-name" id="pp-ev-name"></div>
+        <div class="popup-event-det" id="pp-ev-det"></div>
       </div>
-      <div class="popup-actions">
-        <button class="popup-btn-primary" onclick="closePopup();document.getElementById('rejoindre').scrollIntoView({behavior:'smooth'})">Rejoindre l'ATN</button>
-        <button class="popup-btn-secondary" onclick="closePopup()">Visiter le site</button>
+      <div class="popup-btns">
+        <button class="pbtn-p" onclick="closePopup();scrollTo('#rejoindre')">Rejoindre l'ATN</button>
+        <button class="pbtn-s" onclick="closePopup()">Visiter le site</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- LIGHTBOX -->
-<div id="lightbox" onclick="closeLightbox()">
-  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-  <img id="lightbox-img" src="" alt="">
-  <div id="lightbox-caption"></div>
+<div id="lb" onclick="closeLB()">
+  <button id="lb-close" onclick="closeLB()">✕</button>
+  <img id="lb-img" src="" alt="">
+  <div id="lb-cap"></div>
 </div>
 
 <!-- NAV -->
 <nav>
-  <a href="#accueil" class="nav-logo">
-    <div class="nav-logo-flag"><div style="flex:1;background:var(--vert)"></div><div style="flex:1;background:var(--jaune)"></div><div style="flex:1;background:var(--rouge)"></div></div>
-    AT<span>N</span>
+  <a href="#hero" class="logo">
+    <div class="logo-flag">
+      <div style="background:var(--vert)"></div>
+      <div style="background:var(--jaune)"></div>
+      <div style="background:var(--rouge)"></div>
+    </div>
+    <div class="logo-text">AT<span>N</span></div>
   </a>
   <ul class="nav-links">
     <li><a href="#apropos">L'association</a></li>
     <li><a href="#activites">Activités</a></li>
-    <li><a href="#agenda">Agenda</a></li>
     <li><a href="#galerie">Galerie</a></li>
-    <li><a href="#adhesion">Adhésion</a></li>
+    <li><a href="#agenda">Agenda</a></li>
     <li><a href="#contact" class="nav-cta">Nous rejoindre</a></li>
   </ul>
 </nav>
 
 <!-- HERO -->
-<section id="accueil">
-  <div class="hero-bg"></div><div class="hero-pattern"></div>
-  <div class="hero-content">
-    <div class="hero-tag" id="h-tag">🇹🇬 Lomé à Nancy, notre cœur bat pour deux pays</div>
-    <h1 class="hero-title">La communauté<br><em>togolaise</em><br>de <strong>Nancy</strong></h1>
-    <p class="hero-sub" id="h-sub">Depuis des années, l'ATN rassemble les Togolais et sympathisants de Nancy et de Lorraine autour de la culture, de la solidarité et de l'entraide.</p>
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow" id="h-eyebrow">🇹🇬 Lomé à Nancy — notre cœur bat pour deux pays</div>
+    <h1 class="hero-h">
+      La communauté<br>
+      <em>togolaise</em><br>
+      de <strong>Nancy</strong>
+    </h1>
+    <p class="hero-p" id="h-sub">Depuis des années, l'ATN rassemble les Togolais et sympathisants de Nancy et de Lorraine autour de la culture, de la solidarité et de l'entraide.</p>
     <div class="hero-actions">
-      <a href="#rejoindre" class="btn-primary">▶ Rejoindre l'ATN</a>
-      <a href="#activites" class="btn-secondary">Découvrir nos activités</a>
+      <a href="#rejoindre" class="btn btn-g">▶ Rejoindre l'ATN</a>
+      <a href="#activites" class="btn btn-o">Nos activités</a>
     </div>
   </div>
-  <div class="hero-flag"><div class="f1"></div><div class="f2"></div><div class="f3"></div></div>
-  <div class="hero-scroll"><div class="hero-scroll-line"></div>Défiler</div>
+  <div class="hero-drapeau"><div class="d1"></div><div class="d2"></div><div class="d3"></div></div>
 </section>
 
 <!-- À PROPOS -->
 <section id="apropos">
-  <span class="section-label">Qui sommes-nous</span>
-  <h2 class="section-title reveal">Une association vivante,<br>ancrée à Nancy</h2>
-  <div class="apropos-grid reveal">
+  <span class="s-label">Qui sommes-nous</span>
+  <h2 class="s-title reveal">Une association vivante,<br>ancrée à Nancy</h2>
+  <div class="apropos-layout reveal">
     <div class="apropos-text">
-      <p id="a-p1">L'Association des Togolais de Nancy (ATN) est un espace de vie et de partage pour la communauté togolaise établie à Nancy et en Lorraine. Toute personne, togolaise ou non, intéressée par le Togo et sa culture y est la bienvenue.</p>
+      <p id="a-p1">L'Association des Togolais de Nancy (ATN) est un espace de vie et de partage pour la communauté togolaise établie à Nancy et en Lorraine. Toute personne, togolaise ou non, est la bienvenue.</p>
       <p id="a-p2">Nous œuvrons pour l'intégration sociale et culturelle de nos membres, le soutien aux étudiants et nouveaux arrivants, et la promotion de la culture togolaise en France.</p>
-      <p id="a-p3">L'ATN est un pont entre deux cultures, entre Lomé et Nancy. Nous organisons des événements festifs, culturels, sportifs et solidaires tout au long de l'année.</p>
+      <p id="a-p3">L'ATN est un pont entre deux cultures. Nous organisons des événements festifs, culturels, sportifs et solidaires tout au long de l'année.</p>
     </div>
-    <div class="apropos-stats">
-      <div class="stat-card"><div class="stat-num" id="s1">200+</div><div class="stat-label">Membres actifs</div></div>
-      <div class="stat-card"><div class="stat-num" id="s2">15+</div><div class="stat-label">Événements par an</div></div>
-      <div class="stat-card"><div class="stat-num" id="s3">20+</div><div class="stat-label">Années d'histoire</div></div>
-      <div class="stat-card"><div class="stat-num">🇹🇬</div><div class="stat-label">Une fierté partagée</div></div>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-n" id="s1">200+</div><div class="stat-l">Membres actifs</div></div>
+      <div class="stat"><div class="stat-n" id="s2">15+</div><div class="stat-l">Événements/an</div></div>
+      <div class="stat"><div class="stat-n" id="s3">20+</div><div class="stat-l">Années d'histoire</div></div>
+      <div class="stat"><div class="stat-n">🇹🇬</div><div class="stat-l">Une fierté partagée</div></div>
     </div>
   </div>
 </section>
 
 <!-- ACTIVITÉS -->
 <section id="activites">
-  <div class="activites-intro">
-    <div><span class="section-label">Ce que nous faisons</span><h2 class="section-title reveal">Nos activités</h2></div>
-    <a href="#contact" class="btn-primary">Participer</a>
+  <div class="act-header">
+    <div><span class="s-label">Ce que nous faisons</span><h2 class="s-title reveal">Nos activités</h2></div>
+    <a href="#contact" class="btn btn-g">Participer</a>
   </div>
-  <div class="cards-grid reveal">
-    <div class="card"><div class="card-icon">🎶</div><div class="card-body"><h3 class="card-title">Culture & Musique</h3><p class="card-text">Soirées musicales, concerts, diffusion de la musique togolaise et africaine.</p></div></div>
-    <div class="card"><div class="card-icon rouge">🍛</div><div class="card-body"><h3 class="card-title">Gastronomie togolaise</h3><p class="card-text">Repas communautaires, initiation à la cuisine togolaise — fufu, sauce arachide, akpan.</p></div></div>
-    <div class="card"><div class="card-icon">🤝</div><div class="card-body"><h3 class="card-title">Entraide & Solidarité</h3><p class="card-text">Accompagnement des nouveaux arrivants, aide administrative, soutien aux étudiants.</p></div></div>
-    <div class="card"><div class="card-icon or">⚽</div><div class="card-body"><h3 class="card-title">Sport & Tournois</h3><p class="card-text">Tournois de football, pétanque et autres sports entre membres et associations.</p></div></div>
-    <div class="card"><div class="card-icon">🎓</div><div class="card-body"><h3 class="card-title">Soutien aux étudiants</h3><p class="card-text">Accueil des primo-arrivants, aide à l'installation, mentoring par des membres expérimentés.</p></div></div>
-    <div class="card"><div class="card-icon rouge">🌍</div><div class="card-body"><h3 class="card-title">Projets au Togo</h3><p class="card-text">Collectes et projets de solidarité vers le Togo. Nous n'oublions pas d'où nous venons.</p></div></div>
+  <div class="acts reveal">
+    <div class="act-card"><div class="act-icon v">🎶</div><div class="act-body"><h3 class="act-title">Culture & Musique</h3><p class="act-text">Soirées musicales, concerts et diffusion de la musique togolaise et africaine.</p></div></div>
+    <div class="act-card"><div class="act-icon r">🍛</div><div class="act-body"><h3 class="act-title">Gastronomie togolaise</h3><p class="act-text">Repas communautaires et initiation à la cuisine togolaise — fufu, sauce arachide, akpan.</p></div></div>
+    <div class="act-card"><div class="act-icon v">🤝</div><div class="act-body"><h3 class="act-title">Entraide & Solidarité</h3><p class="act-text">Accompagnement des nouveaux arrivants, aide administrative, soutien aux étudiants.</p></div></div>
+    <div class="act-card"><div class="act-icon y">⚽</div><div class="act-body"><h3 class="act-title">Sport & Tournois</h3><p class="act-text">Tournois de football, pétanque et autres sports entre membres et associations.</p></div></div>
+    <div class="act-card"><div class="act-icon v">🎓</div><div class="act-body"><h3 class="act-title">Soutien aux étudiants</h3><p class="act-text">Accueil des primo-arrivants, aide à l'installation et mentoring.</p></div></div>
+    <div class="act-card"><div class="act-icon r">🌍</div><div class="act-body"><h3 class="act-title">Projets au Togo</h3><p class="act-text">Collectes et projets de solidarité vers le Togo. Nous n'oublions pas nos racines.</p></div></div>
   </div>
 </section>
 
 <!-- GALERIE -->
 <section id="galerie">
-  <span class="section-label">En images</span>
-  <h2 class="section-title reveal">Nos moments partagés</h2>
-  <p class="section-sub reveal">Cliquez sur une photo pour l'agrandir.</p>
-  <div class="galerie-grid reveal" id="galerie-grid"></div>
+  <span class="s-label">En images</span>
+  <h2 class="s-title reveal">Nos moments partagés</h2>
+  <p class="s-sub reveal">Cliquez sur une photo pour l'agrandir.</p>
+  <div class="gal-grid reveal" id="gal-grid"></div>
 </section>
 
 <!-- AGENDA -->
 <section id="agenda">
-  <span class="section-label">Prochains événements</span>
-  <h2 class="section-title reveal">Agenda <span style="color:var(--vert)" id="agenda-annee">2026</span></h2>
-  <p class="section-sub reveal">Retrouvez tous nos événements à venir.</p>
-  <div class="events-list reveal" id="events-container"></div>
+  <span class="s-label">Prochains événements</span>
+  <h2 class="s-title reveal">Agenda <span style="color:var(--vert)" id="yr"></span></h2>
+  <p class="s-sub reveal">Retrouvez tous nos événements à venir.</p>
+  <div class="events reveal" id="events"></div>
 </section>
 
 <!-- REJOINDRE -->
 <section id="rejoindre">
-  <span class="section-label">Nous rejoindre</span>
-  <h2 class="section-title reveal">Devenez membre de l'ATN</h2>
-  <p class="section-sub reveal" style="margin:0 auto">Que vous soyez Togolais de naissance ou de cœur, il y a une place pour vous.</p>
-  <div class="rejoindre-cards">
-    <div class="rcard reveal"><div class="rcard-icon">📋</div><div class="rcard-title">Adhésion simple</div><div class="rcard-text">Remplissez le formulaire ci-dessous. Cotisation annuelle accessible à tous.</div></div>
-    <div class="rcard reveal"><div class="rcard-icon">💬</div><div class="rcard-title">WhatsApp</div><div class="rcard-text">Rejoignez notre groupe WhatsApp pour rester informé de toutes les actualités.</div></div>
-    <div class="rcard reveal"><div class="rcard-icon">🎉</div><div class="rcard-title">Venez à un événement</div><div class="rcard-text">La meilleure façon de nous connaître. Tous sont les bienvenus.</div></div>
-    <div class="rcard reveal"><div class="rcard-icon">❤️</div><div class="rcard-title">HelloAsso</div><div class="rcard-text">Adhérez ou faites un don en ligne via notre page HelloAsso sécurisée.</div></div>
-  </div>
-</section>
-
-<!-- CARTE ADHÉSION -->
-<section id="adhesion">
-  <span class="section-label">Votre carte de membre</span>
-  <h2 class="section-title reveal">Générez votre carte d'adhésion</h2>
-  <p class="section-sub reveal">Remplissez le formulaire et téléchargez votre carte officielle ATN en quelques secondes.</p>
-  <div class="adhesion-grid reveal">
-    <div class="adhesion-form-card">
-      <h3 class="adhesion-form-title">Vos informations</h3>
-      <div class="afield-row">
-        <div class="afield"><label>Prénom</label><input type="text" id="c-prenom" placeholder="Koffi" oninput="updateCarte()"></div>
-        <div class="afield"><label>Nom</label><input type="text" id="c-nom" placeholder="Mensah" oninput="updateCarte()"></div>
-      </div>
-      <div class="afield"><label>Type d'adhésion</label>
-        <select id="c-type" onchange="updateCarte()">
-          <option value="Adhésion Annuelle">Adhésion Annuelle</option>
-          <option value="Adhésion Mensuelle">Adhésion Mensuelle</option>
-          <option value="Adhésion Étudiant">Adhésion Étudiant</option>
-          <option value="Membre Bienfaiteur">Membre Bienfaiteur</option>
-        </select>
-      </div>
-      <div class="afield-row">
-        <div class="afield"><label>Année de validité</label>
-          <select id="c-annee" onchange="updateCarte()">
-            <option>2026</option><option>2027</option><option>2028</option>
-          </select>
-        </div>
-        <div class="afield"><label>Numéro membre</label><input type="text" id="c-id" placeholder="ATN-0001" oninput="updateCarte()"></div>
-      </div>
-      <button class="gen-btn" onclick="downloadCarte()">⬇️ Télécharger ma carte (PNG)</button>
-    </div>
-    <div class="carte-preview-wrap">
-      <p class="carte-preview-label">Aperçu de votre carte</p>
-      <div class="carte" id="carte-preview">
-        <div class="carte-stripe"><div class="s1"></div><div class="s2"></div><div class="s3"></div></div>
-        <div class="carte-wave"></div>
-        <div class="carte-body">
-          <div class="carte-header">
-            <div class="carte-asso"><strong>ATN</strong>Association des<br>Togolais de Nancy</div>
-            <div class="carte-type" id="c-type-label">Adhésion Annuelle</div>
-          </div>
-          <div class="carte-middle">
-            <div class="carte-qr" id="carte-qr">QR<br>CODE</div>
-            <div class="carte-info">
-              <div class="carte-nom" id="c-nom-display">Prénom Nom</div>
-              <div class="carte-id" id="c-id-display">ID: ATN-0001</div>
-            </div>
-          </div>
-          <div class="carte-footer">
-            <div class="carte-validite">Validité<strong id="c-validite-display">2026</strong></div>
-            <div class="carte-sceau">✓</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <span class="s-label">Nous rejoindre</span>
+  <h2 class="s-title reveal">Devenez membre de l'ATN</h2>
+  <p class="s-sub reveal">Que vous soyez Togolais de naissance ou de cœur, il y a une place pour vous.</p>
+  <div class="rj-grid">
+    <div class="rj-card reveal"><div class="rj-icon">📋</div><div class="rj-title">Adhésion simple</div><div class="rj-text">Remplissez le formulaire ci-dessous. Cotisation annuelle accessible à tous.</div></div>
+    <div class="rj-card reveal"><div class="rj-icon">💬</div><div class="rj-title">WhatsApp</div><div class="rj-text">Rejoignez notre groupe WhatsApp pour rester informé de toutes les actualités.</div></div>
+    <div class="rj-card reveal"><div class="rj-icon">🎉</div><div class="rj-title">Venez à un événement</div><div class="rj-text">La meilleure façon de nous connaître. Tous sont les bienvenus.</div></div>
+    <div class="rj-card reveal"><div class="rj-icon">❤️</div><div class="rj-title">HelloAsso</div><div class="rj-text">Adhérez ou faites un don en ligne via notre page HelloAsso.</div></div>
   </div>
 </section>
 
 <!-- CONTACT -->
 <section id="contact">
-  <span class="section-label">Contact</span>
-  <h2 class="section-title reveal">Prenons contact</h2>
-  <div class="contact-grid">
-    <div class="contact-info reveal">
-      <div class="contact-block">
-        <div class="contact-icon">📧</div>
-        <div class="contact-detail"><p>Email</p><p><a id="c-email" href="mailto:Associationdestogolaisdenancya@gmail.com">Associationdestogolaisdenancya@gmail.com</a></p></div>
+  <span class="s-label">Contact</span>
+  <h2 class="s-title reveal">Prenons contact</h2>
+  <div class="contact-layout">
+    <div class="cinfo reveal">
+      <div class="cblock">
+        <div class="cicon">📧</div>
+        <div class="cdet"><p>Email</p><p><a id="c-email" href="mailto:Associationdestogolaisdenancya@gmail.com">Associationdestogolaisdenancya@gmail.com</a></p></div>
       </div>
-      <div class="contact-block">
-        <div class="contact-icon">📍</div>
-        <div class="contact-detail"><p>Ville</p><p id="c-ville">Nancy, Meurthe-et-Moselle (54)</p></div>
+      <div class="cblock">
+        <div class="cicon">📍</div>
+        <div class="cdet"><p>Ville</p><p id="c-ville">Nancy, Meurthe-et-Moselle (54)</p></div>
       </div>
-      <div class="contact-block">
-        <div class="contact-icon">🔗</div>
-        <div class="contact-detail"><p>Nos réseaux</p>
-          <div class="social-links" id="social-links-container">
-            <a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="social-btn" style="background:var(--vert)">❤️ HelloAsso</a>
+      <div class="cblock">
+        <div class="cicon">🔗</div>
+        <div class="cdet">
+          <p>Nos réseaux</p>
+          <div class="socials" id="socials">
+            <a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="sbtn" style="background:var(--vert)">❤️ HelloAsso</a>
           </div>
         </div>
       </div>
     </div>
-    <div class="contact-form-card reveal">
-      <h3 class="form-title">Nous écrire</h3>
-      <p class="form-sub">Une question, une envie de rejoindre l'ATN ?</p>
-      <form onsubmit="submitForm(event)">
-        <div class="form-row">
-          <div class="form-group"><label>Prénom</label><input type="text" required placeholder="Koffi"></div>
-          <div class="form-group"><label>Nom</label><input type="text" required placeholder="Mensah"></div>
+    <div class="cform reveal">
+      <h3 class="cf-title">Nous écrire</h3>
+      <p class="cf-sub">Une question, une envie de rejoindre l'ATN ? On vous répond rapidement.</p>
+      <form onsubmit="sendForm(event)">
+        <div class="fg-row">
+          <div class="fg"><label>Prénom</label><input type="text" required placeholder="Koffi"></div>
+          <div class="fg"><label>Nom</label><input type="text" required placeholder="Mensah"></div>
         </div>
-        <div class="form-group"><label>Email</label><input type="email" required placeholder="vous@email.com"></div>
-        <div class="form-group"><label>Sujet</label><select><option>Adhésion</option><option>Renseignements</option><option>Partenariat</option><option>Autre</option></select></div>
-        <div class="form-group"><label>Message</label><textarea placeholder="Votre message..."></textarea></div>
-        <button type="submit" class="form-submit">Envoyer ✉️</button>
-        <div class="form-success" id="form-success">✅ Message envoyé ! Nous vous répondrons sous 48h.</div>
+        <div class="fg"><label>Email</label><input type="email" required placeholder="vous@email.com"></div>
+        <div class="fg"><label>Sujet</label>
+          <select><option>Adhésion</option><option>Renseignements</option><option>Partenariat</option><option>Autre</option></select>
+        </div>
+        <div class="fg"><label>Message</label><textarea placeholder="Votre message..."></textarea></div>
+        <button type="submit" class="fsub">Envoyer ✉️</button>
+        <div class="fsuccess" id="fsuccess">✅ Message envoyé ! Nous vous répondrons sous 48h.</div>
       </form>
     </div>
   </div>
@@ -494,283 +502,134 @@ footer{background:var(--noir);color:rgba(255,255,255,0.5);border-top:1px solid r
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-flag"><div class="ff1"></div><div class="ff2"></div><div class="ff3"></div></div>
-  <div class="footer-inner">
+  <div class="ft-stripe"><div class="fs1"></div><div class="fs2"></div><div class="fs3"></div></div>
+  <div class="ft-inner">
     <div>
-      <span class="footer-logo">AT<span>N</span></span>
-      <p class="footer-tagline">Unis par nos racines,<br>fiers de notre avenir</p>
-      <div class="footer-social" id="footer-social">
-        <a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="footer-social-btn">❤️</a>
+      <span class="ft-logo">AT<span>N</span></span>
+      <p class="ft-tag">Unis par nos racines,<br>fiers de notre avenir 🇹🇬</p>
+      <div class="ft-socials" id="ft-socials">
+        <a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="ft-sbtn">❤️</a>
       </div>
     </div>
-    <div class="footer-links-col">
-      <p class="footer-col-title">Navigation</p>
-      <a href="#accueil">Accueil</a><a href="#apropos">L'association</a>
-      <a href="#activites">Nos activités</a><a href="#agenda">Agenda</a>
-      <a href="#galerie">Galerie</a><a href="#adhesion">Adhésion</a><a href="#contact">Contact</a>
+    <div class="ft-col">
+      <p class="ft-col-title">Navigation</p>
+      <a href="#hero">Accueil</a><a href="#apropos">L'association</a>
+      <a href="#activites">Activités</a><a href="#galerie">Galerie</a>
+      <a href="#agenda">Agenda</a><a href="#contact">Contact</a>
     </div>
-    <div class="footer-links-col">
-      <p class="footer-col-title">Contact</p>
+    <div class="ft-col">
+      <p class="ft-col-title">Contact</p>
       <a href="mailto:Associationdestogolaisdenancya@gmail.com">✉️ Nous écrire</a>
       <a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank">❤️ HelloAsso</a>
-      <a href="#adhesion">🎫 Carte d'adhésion</a>
-      <p style="color:rgba(255,255,255,0.25);font-size:0.82rem;margin-top:0.75rem">Nancy, Meurthe-et-Moselle<br>Grand Est, France 🇫🇷</p>
+      <a href="#rejoindre">📋 Adhérer</a>
+      <p style="color:rgba(255,255,255,.2);font-size:.8rem;margin-top:.5rem">Nancy, Grand Est 🇫🇷</p>
     </div>
   </div>
-  <div class="footer-bottom">
-    <p>© 2026 Association des Togolais de Nancy (ATN) · <a href="mailto:Associationdestogolaisdenancya@gmail.com">Associationdestogolaisdenancya@gmail.com</a></p>
-  </div>
+  <div class="ft-bottom">© 2026 Association des Togolais de Nancy · <a href="mailto:Associationdestogolaisdenancya@gmail.com">Associationdestogolaisdenancya@gmail.com</a></div>
 </footer>
 
 <script>
-// ===== DEFAULTS =====
-const defaultEvents = [
-  {day:'14',month:'Juin',name:'Soirée culturelle togolaise',location:'Salle des fêtes, Nancy',badge:'culture',badgeClass:'badge-culture'},
-  {day:'28',month:'Juin',name:'Tournoi de football ATN',location:'Terrain synthétique Vandœuvre',badge:'sport',badgeClass:'badge-sport'},
-  {day:'20',month:'Juil',name:'Barbecue de la communauté',location:'Parc de la Pépinière, Nancy',badge:'social',badgeClass:'badge-social'},
-  {day:'15',month:'Sept',name:'Accueil des nouveaux étudiants',location:'Campus Lettres Nancy',badge:'solidarité',badgeClass:'badge-solidarite'},
+const defaultEvents=[
+  {day:'14',month:'Juin',name:'Soirée culturelle togolaise',location:'Salle des fêtes, Nancy',badge:'culture',bc:'bc'},
+  {day:'28',month:'Juin',name:'Tournoi de football ATN',location:'Terrain synthétique Vandœuvre',badge:'sport',bc:'bsp'},
+  {day:'20',month:'Juil',name:'Barbecue de la communauté',location:'Parc de la Pépinière, Nancy',badge:'social',bc:'bs'},
+  {day:'15',month:'Sept',name:'Accueil des nouveaux étudiants',location:'Campus Lettres Nancy',badge:'solidarité',bc:'bso'},
 ];
 
-// ===== APPLY DATA =====
-function applyData(d) {
-  if(d.tag) document.getElementById('h-tag').textContent = d.tag;
-  if(d.sub) document.getElementById('h-sub').textContent = d.sub;
-  if(d.p1) document.getElementById('a-p1').textContent = d.p1;
-  if(d.p2) document.getElementById('a-p2').textContent = d.p2;
-  if(d.p3) document.getElementById('a-p3').textContent = d.p3;
-  if(d.s1) document.getElementById('s1').textContent = d.s1;
-  if(d.s2) document.getElementById('s2').textContent = d.s2;
-  if(d.s3) document.getElementById('s3').textContent = d.s3;
+const SOCIAL_ICONS={facebook:'📘',instagram:'📸',whatsapp:'💬',youtube:'▶',tiktok:'🎵',linkedin:'💼',twitter:'🐦',snapchat:'👻'};
+const SOCIAL_COLORS={facebook:'#1877F2',instagram:'#E1306C',whatsapp:'#25D366',youtube:'#FF0000',tiktok:'#010101',linkedin:'#0077B5',twitter:'#1DA1F2',snapchat:'#FFFC00'};
+
+function applyData(d){
+  if(d.eyebrow) document.getElementById('h-eyebrow').textContent=d.eyebrow;
+  if(d.sub) document.getElementById('h-sub').textContent=d.sub;
+  if(d.p1) document.getElementById('a-p1').textContent=d.p1;
+  if(d.p2) document.getElementById('a-p2').textContent=d.p2;
+  if(d.p3) document.getElementById('a-p3').textContent=d.p3;
+  if(d.s1) document.getElementById('s1').textContent=d.s1;
+  if(d.s2) document.getElementById('s2').textContent=d.s2;
+  if(d.s3) document.getElementById('s3').textContent=d.s3;
   if(d.email){const e=document.getElementById('c-email');e.textContent=d.email;e.href='mailto:'+d.email}
-  if(d.ville) document.getElementById('c-ville').textContent = d.ville;
-
-  // Réseaux sociaux dynamiques
-  if(d.reseaux) {
-    const container = document.getElementById('social-links-container');
-    const footerSocial = document.getElementById('footer-social');
-    const icons = {facebook:'📘',instagram:'📸',whatsapp:'💬',youtube:'▶',tiktok:'🎵',linkedin:'💼',twitter:'🐦',snapchat:'👻'};
-    const colors = {facebook:'#1877F2',instagram:'#E1306C',whatsapp:'#25D366',youtube:'#FF0000',tiktok:'#000',linkedin:'#0077B5',twitter:'#1DA1F2',snapchat:'#FFFC00'};
-    let html = '<a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="social-btn" style="background:var(--vert)">❤️ HelloAsso</a>';
-    let footerHtml = '<a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="footer-social-btn">❤️</a>';
-    Object.entries(d.reseaux).forEach(([k,v]) => {
-      if(v && v.length > 5) {
-        const icon = icons[k]||'🔗';
-        const color = colors[k]||'#333';
-        const name = k.charAt(0).toUpperCase()+k.slice(1);
-        html += `<a href="${v}" target="_blank" class="social-btn" style="background:${color}">${icon} ${name}</a>`;
-        footerHtml += `<a href="${v}" target="_blank" class="footer-social-btn">${icon}</a>`;
-      }
-    });
-    container.innerHTML = html;
-    footerSocial.innerHTML = footerHtml;
-  }
-
+  if(d.ville) document.getElementById('c-ville').textContent=d.ville;
+  if(d.reseaux) buildSocials(d.reseaux);
   if(d.events&&d.events.length) renderEvents(d.events);
   else renderEvents(defaultEvents);
-  if(d.photos) renderGallery(Object.values(d.photos));
+  if(d.photos) renderGallery(Object.values(d.photos).filter(Boolean));
   else renderGallery([]);
-
-  // Popup avec premier événement
-  if(d.events && d.events.length) {
-    const ev = d.events[0];
-    document.getElementById('popup-event').style.display = 'block';
-    document.getElementById('popup-event-name').textContent = ev.name;
-    document.getElementById('popup-event-info').textContent = `📅 ${ev.day} ${ev.month} · 📍 ${ev.location}`;
+  // Popup
+  if(d.popupTitle) document.getElementById('pp-title').textContent=d.popupTitle;
+  if(d.popupText) document.getElementById('pp-text').textContent=d.popupText;
+  if(d.events&&d.events.length){
+    const ev=d.events[0];
+    document.getElementById('pp-event').style.display='block';
+    document.getElementById('pp-ev-name').textContent=ev.name;
+    document.getElementById('pp-ev-det').textContent=`📅 ${ev.day} ${ev.month} · 📍 ${ev.location}`;
   }
-  if(d.popupTitle) document.getElementById('popup-title').textContent = d.popupTitle;
-  if(d.popupText) document.getElementById('popup-text').textContent = d.popupText;
 }
 
-// ===== EVENTS =====
-function renderEvents(events) {
-  const c = document.getElementById('events-container');
-  if(!events||!events.length){c.innerHTML='<p class="no-events">Aucun événement à venir pour le moment.</p>';return}
-  c.innerHTML = events.map(ev=>`
-    <div class="event-item">
-      <div class="event-date"><div class="event-day">${ev.day}</div><div class="event-month">${ev.month}</div></div>
-      <div><div class="event-name">${ev.name}</div><div class="event-location">📍 ${ev.location}</div></div>
-      <span class="event-badge ${ev.badgeClass}">${ev.badge}</span>
+function initDefaults(){ renderEvents(defaultEvents); renderGallery([]); }
+
+function buildSocials(r){
+  let h='<a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="sbtn" style="background:var(--vert)">❤️ HelloAsso</a>';
+  let fh='<a href="https://www.helloasso.com/associations/association-des-togolais-de-nancy-atn" target="_blank" class="ft-sbtn">❤️</a>';
+  Object.entries(r).forEach(([k,v])=>{
+    if(v&&v.length>5){
+      const ic=SOCIAL_ICONS[k]||'🔗',col=SOCIAL_COLORS[k]||'#333',nm=k[0].toUpperCase()+k.slice(1);
+      h+=`<a href="${v}" target="_blank" class="sbtn" style="background:${col}">${ic} ${nm}</a>`;
+      fh+=`<a href="${v}" target="_blank" class="ft-sbtn">${ic}</a>`;
+    }
+  });
+  document.getElementById('socials').innerHTML=h;
+  document.getElementById('ft-socials').innerHTML=fh;
+}
+
+function renderEvents(evs){
+  const c=document.getElementById('events');
+  if(!evs||!evs.length){c.innerHTML='<p style="color:var(--gris);font-style:italic;padding:2rem 0">Aucun événement à venir pour le moment.</p>';return}
+  c.innerHTML=evs.map(e=>`
+    <div class="ev">
+      <div class="ev-date"><div class="ev-day">${e.day}</div><div class="ev-month">${e.month}</div></div>
+      <div><div class="ev-name">${e.name}</div><div class="ev-loc">📍 ${e.location}</div></div>
+      <span class="ev-badge ${e.bc||'bc'}">${e.badge}</span>
     </div>`).join('');
 }
 
-// ===== GALLERY =====
-function renderGallery(photos) {
-  const g = document.getElementById('galerie-grid');
+function renderGallery(photos){
+  const g=document.getElementById('gal-grid');
   if(!photos||!photos.length){
-    g.innerHTML=`
-      <div class="galerie-item" onclick="openLightbox('','Fête annuelle')"><span class="galerie-placeholder">🎊</span><div class="galerie-overlay"><div><div class="galerie-caption">Fête annuelle</div></div></div></div>
-      <div class="galerie-item" onclick="openLightbox('','Soirée gastronomique')"><span class="galerie-placeholder">🍛</span><div class="galerie-overlay"><div><div class="galerie-caption">Soirée gastronomique</div></div></div></div>
-      <div class="galerie-item" onclick="openLightbox('','Tournoi de football')"><span class="galerie-placeholder">⚽</span><div class="galerie-overlay"><div><div class="galerie-caption">Tournoi de football</div></div></div></div>`;
+    g.innerHTML='<div class="gal-empty">📸 Les photos de nos événements arrivent bientôt !</div>';
     return;
   }
-  g.innerHTML = photos.map(p=>`
-    <div class="galerie-item" onclick="openLightbox('${p.url}','${p.caption||''}','${p.subcaption||''}')">
+  g.innerHTML=photos.map(p=>`
+    <div class="gal-item" onclick="openLB('${p.url}','${(p.caption||'').replace(/'/g,"\\'")}','${(p.subcaption||'').replace(/'/g,"\\'")}')">
       <img src="${p.url}" alt="${p.caption||'Photo ATN'}" loading="lazy">
-      <div class="galerie-overlay"><div><div class="galerie-caption">${p.caption||''}</div>${p.subcaption?`<div class="galerie-sub">${p.subcaption}</div>`:''}</div></div>
+      <div class="gal-overlay">
+        <div>
+          <div class="gal-title">${p.caption||''}</div>
+          ${p.subcaption?`<div class="gal-sub">${p.subcaption}</div>`:''}
+        </div>
+      </div>
     </div>`).join('');
 }
 
-// ===== LIGHTBOX =====
-function openLightbox(url, caption, sub) {
-  if(!url) return;
-  document.getElementById('lightbox-img').src = url;
-  document.getElementById('lightbox-caption').textContent = caption || '';
-  document.getElementById('lightbox').classList.add('show');
-  document.body.style.overflow = 'hidden';
+function openLB(url,cap,sub){
+  if(!url)return;
+  document.getElementById('lb-img').src=url;
+  document.getElementById('lb-cap').textContent=cap||'';
+  document.getElementById('lb').classList.add('show');
+  document.body.style.overflow='hidden';
 }
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('show');
-  document.body.style.overflow = '';
-}
+function closeLB(){document.getElementById('lb').classList.remove('show');document.body.style.overflow='';}
 
-// ===== POPUP =====
-function closePopup() {
-  document.getElementById('popup-bienvenue').classList.remove('show');
-  document.body.style.overflow = '';
-  sessionStorage.setItem('popup-seen','1');
-}
-setTimeout(() => {
-  if(!sessionStorage.getItem('popup-seen')) {
-    document.getElementById('popup-bienvenue').classList.add('show');
-  }
-}, 1500);
+function closePopup(){document.getElementById('popup').classList.remove('show');document.body.style.overflow='';sessionStorage.setItem('pp','1')}
+function scrollTo(id){document.querySelector(id)?.scrollIntoView({behavior:'smooth'})}
+setTimeout(()=>{if(!sessionStorage.getItem('pp')){document.getElementById('popup').classList.add('show');}},1800);
 
-// ===== CARTE ADHÉSION =====
-function updateCarte() {
-  const prenom = document.getElementById('c-prenom').value || 'Prénom';
-  const nom = document.getElementById('c-nom').value || 'Nom';
-  const type = document.getElementById('c-type').value;
-  const annee = document.getElementById('c-annee').value;
-  const id = document.getElementById('c-id').value || 'ATN-0001';
-  document.getElementById('c-nom-display').textContent = prenom + ' ' + nom;
-  document.getElementById('c-type-label').textContent = type;
-  document.getElementById('c-id-display').textContent = 'ID: ' + id;
-  document.getElementById('c-validite-display').textContent = annee;
-  document.getElementById('carte-qr').innerHTML = `<div style="font-size:0.45rem;text-align:center;color:#000;font-weight:700">ATN<br>${id}<br>${annee}</div>`;
-}
+function sendForm(e){e.preventDefault();document.getElementById('fsuccess').style.display='block';e.target.reset()}
 
-function downloadCarte() {
-  const prenom = document.getElementById('c-prenom').value || 'Membre';
-  const nom = document.getElementById('c-nom').value || 'ATN';
-  const type = document.getElementById('c-type').value;
-  const annee = document.getElementById('c-annee').value;
-  const id = document.getElementById('c-id').value || 'ATN-0001';
-
-  const canvas = document.createElement('canvas');
-  canvas.width = 856; canvas.height = 540;
-  const ctx = canvas.getContext('2d');
-
-  // Fond dégradé vert
-  const grad = ctx.createLinearGradient(0,0,856,540);
-  grad.addColorStop(0,'#004D2C');
-  grad.addColorStop(0.4,'#006B3F');
-  grad.addColorStop(0.7,'#008F52');
-  grad.addColorStop(1,'#004D2C');
-  ctx.fillStyle = grad;
-  ctx.roundRect(0,0,856,540,30);
-  ctx.fill();
-
-  // Bande décorative diagonale
-  ctx.save();
-  ctx.globalAlpha = 0.12;
-  const diagGrad = ctx.createLinearGradient(400,0,856,540);
-  diagGrad.addColorStop(0,'transparent');
-  diagGrad.addColorStop(0.5,'#F9CB15');
-  diagGrad.addColorStop(1,'transparent');
-  ctx.fillStyle = diagGrad;
-  ctx.fillRect(0,0,856,540);
-  ctx.restore();
-
-  // Bande drapeau en haut
-  ctx.fillStyle='#006B3F'; ctx.fillRect(0,0,856/3,12);
-  ctx.fillStyle='#F9CB15'; ctx.fillRect(856/3,0,856/3,12);
-  ctx.fillStyle='#D01221'; ctx.fillRect(856*2/3,0,856/3,12);
-
-  // Titre association
-  ctx.fillStyle='rgba(255,255,255,0.6)';
-  ctx.font='500 22px DM Sans, sans-serif';
-  ctx.fillText('Association des Togolais de Nancy',40,65);
-  ctx.fillStyle='#F9CB15';
-  ctx.font='bold 36px Playfair Display, serif';
-  ctx.fillText('ATN',40,40);
-
-  // Badge type
-  ctx.fillStyle='rgba(249,203,21,0.2)';
-  ctx.strokeStyle='rgba(249,203,21,0.5)';
-  ctx.lineWidth=1.5;
-  const tw = ctx.measureText(type.toUpperCase()).width + 30;
-  ctx.beginPath();
-  ctx.roundRect(856-tw-40,25,tw,30,15);
-  ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#F9CB15';
-  ctx.font='bold 14px DM Sans, sans-serif';
-  ctx.fillText(type.toUpperCase(),856-tw-25,46);
-
-  // QR code simulé
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.roundRect(40,200,110,110,8); ctx.fill();
-  ctx.fillStyle='#000';
-  ctx.font='bold 11px monospace';
-  ctx.fillText('ATN',65,245);
-  ctx.fillText(id,52,262);
-  ctx.fillText(annee,65,279);
-  // Carrés QR
-  const qrSquares=[[44,204,20,20],[130,204,20,20],[44,290,20,20],[68,220,8,8],[80,220,8,8],[68,232,8,8]];
-  qrSquares.forEach(([x,y,w,h])=>{ctx.fillStyle='#000';ctx.fillRect(x,y,w,h)});
-
-  // Nom
-  ctx.fillStyle='#fff';
-  ctx.font='bold 52px Playfair Display, serif';
-  ctx.fillText(prenom+' '+nom,175,270);
-
-  // ID badge
-  const idGrad = ctx.createLinearGradient(175,290,350,290);
-  idGrad.addColorStop(0,'#004D2C'); idGrad.addColorStop(1,'#006B3F');
-  ctx.fillStyle=idGrad;
-  ctx.beginPath(); ctx.roundRect(175,285,200,36,6); ctx.fill();
-  ctx.fillStyle='#F9CB15';
-  ctx.font='bold 18px DM Sans, sans-serif';
-  ctx.fillText('ID: '+id,190,309);
-
-  // Validité
-  ctx.fillStyle='rgba(255,255,255,0.5)';
-  ctx.font='500 18px DM Sans, sans-serif';
-  ctx.fillText('Validité',40,460);
-  ctx.fillStyle='#fff';
-  ctx.font='bold 26px DM Sans, sans-serif';
-  ctx.fillText(annee,40,490);
-
-  // Sceau doré
-  const sceauGrad = ctx.createRadialGradient(796,480,0,796,480,40);
-  sceauGrad.addColorStop(0,'#F5D060');
-  sceauGrad.addColorStop(0.5,'#C8960C');
-  sceauGrad.addColorStop(1,'#8B6508');
-  ctx.fillStyle=sceauGrad;
-  ctx.beginPath(); ctx.arc(796,480,40,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.font='bold 28px sans-serif';
-  ctx.textAlign='center';
-  ctx.fillText('✓',796,490);
-  ctx.textAlign='left';
-
-  // Télécharger
-  const link = document.createElement('a');
-  link.download = `carte-atn-${prenom}-${nom}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-}
-
-// ===== FORM =====
-function submitForm(e){e.preventDefault();document.getElementById('form-success').style.display='block';e.target.reset()}
-
-// ===== SCROLL REVEAL =====
-const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:0.1});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
 document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
-
-// ===== INIT =====
-document.getElementById('agenda-annee').textContent=new Date().getFullYear();
-renderEvents(defaultEvents);
-renderGallery([]);
+document.getElementById('yr').textContent=new Date().getFullYear();
+initDefaults();
 </script>
 </body>
 </html>
