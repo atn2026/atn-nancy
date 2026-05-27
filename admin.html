@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATN — Espace Chargé de Com</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  // ⬇️ MÊME CONFIG QUE index.html
+  const firebaseConfig = {
+    apiKey: "AIzaSyCQcYj-lmfLJ0NEP29RyRAJoN-mHCjFSZk",
+    authDomain: "atn-nancy.firebaseapp.com",
+    databaseURL: "https://atn-nancy-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "atn-nancy",
+    storageBucket: "atn-nancy.firebasestorage.app",
+    messagingSenderId: "395779853361",
+    appId: "1:395779853361:web:c603087d4b3a0d56865910"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  const storage = getStorage(app);
+
+  window._fb = { auth, db, storage, ref, set, get, onValue, sRef, uploadBytes, getDownloadURL, deleteObject, signInWithEmailAndPassword, signOut };
+
+  // Surveille l'état de connexion
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      document.getElementById('user-email').textContent = user.email;
+      loadData();
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('admin-screen').style.display = 'none';
+    }
+  });
+</script>
+
+<style>
+  :root {
+    --vert:#006B3F; --rouge:#D01221; --jaune:#F9CB15;
+    --noir:#0F0E0B; --blanc:#FAFAF5; --creme:#F4F1E8; --gris:#7A7870;
+    --vert-pale:#E8F4EF; --vert-fonce:#004D2C;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:var(--creme);color:var(--noir);min-height:100vh}
+
+  /* LOGIN */
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--noir);padding:2rem}
+  .login-card{background:var(--blanc);border-radius:20px;padding:3rem;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,0.4)}
+  .login-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--vert);text-align:center;margin-bottom:0.5rem}
+  .login-sub{text-align:center;color:var(--gris);font-size:0.9rem;margin-bottom:2.5rem}
+  .login-field{margin-bottom:1.25rem}
+  .login-field label{display:block;font-size:0.82rem;font-weight:600;margin-bottom:0.4rem;letter-spacing:0.03em}
+  .login-field input{width:100%;padding:0.85rem 1rem;border:1.5px solid #DDD9CE;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;transition:border-color 0.2s}
+  .login-field input:focus{outline:none;border-color:var(--vert)}
+  .login-btn{width:100%;padding:0.95rem;background:var(--vert);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;margin-top:0.5rem}
+  .login-btn:hover{background:var(--vert-fonce)}
+  .login-btn:disabled{opacity:0.6;cursor:not-allowed}
+  .login-err{color:var(--rouge);font-size:0.85rem;text-align:center;margin-top:1rem;display:none;background:#FFF0F1;padding:0.75rem;border-radius:8px}
+  .login-flag{display:flex;height:6px;border-radius:4px;overflow:hidden;margin-bottom:2rem}
+  .login-flag div{flex:1}
+  .f1{background:var(--vert)}.f2{background:var(--jaune)}.f3{background:var(--rouge)}
+
+  /* ADMIN SCREEN */
+  #admin-screen{display:none}
+  .admin-header{background:var(--noir);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(249,203,21,0.2)}
+  .admin-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--jaune)}
+  .admin-logo span{color:var(--vert)}
+  .header-right{display:flex;align-items:center;gap:1.5rem}
+  .user-badge{font-size:0.82rem;color:rgba(255,255,255,0.5)}
+  .user-badge strong{color:rgba(255,255,255,0.85)}
+  .logout-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+  .logout-btn:hover{background:rgba(208,18,33,0.2);border-color:rgba(208,18,33,0.4);color:#FF8088}
+  .view-site-btn{background:var(--vert);color:#fff;padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s}
+  .view-site-btn:hover{background:var(--vert-fonce)}
+
+  .admin-body{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px)}
+
+  /* SIDEBAR */
+  .sidebar{background:#fff;border-right:1px solid #E8E5DC;padding:1.5rem 0}
+  .sidebar-section{margin-bottom:0.5rem}
+  .sidebar-label{font-size:0.7rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gris);padding:0.5rem 1.5rem;margin-bottom:0.25rem}
+  .sidebar-btn{width:100%;text-align:left;padding:0.7rem 1.5rem;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;color:#444;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:0.75rem;border-left:3px solid transparent}
+  .sidebar-btn:hover{background:var(--vert-pale);color:var(--vert)}
+  .sidebar-btn.active{background:var(--vert-pale);color:var(--vert);border-left-color:var(--vert);font-weight:600}
+  .sidebar-btn .icon{font-size:1.1rem;width:22px;text-align:center}
+
+  /* MAIN CONTENT */
+  .main-content{padding:2.5rem;max-width:900px}
+  .page-title{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;margin-bottom:0.4rem}
+  .page-sub{color:var(--gris);font-size:0.9rem;margin-bottom:2.5rem}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  /* CARDS */
+  .form-card{background:#fff;border:1px solid #E8E5DC;border-radius:16px;padding:2rem;margin-bottom:1.5rem}
+  .form-card-title{font-weight:600;font-size:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #F0EDE4;display:flex;align-items:center;gap:0.6rem}
+  .field{margin-bottom:1.25rem}
+  .field label{display:block;font-size:0.82rem;font-weight:600;margin-bottom:0.4rem;color:#333}
+  .field input,.field textarea,.field select{width:100%;padding:0.75rem 1rem;border:1.5px solid #DDD9CE;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--noir);transition:border-color 0.2s;-webkit-appearance:none}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--vert)}
+  .field textarea{resize:vertical;min-height:90px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .field-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+  .save-bar{display:flex;align-items:center;gap:1rem;margin-top:1.5rem}
+  .save-btn{background:var(--vert);color:#fff;border:none;padding:0.8rem 2rem;border-radius:8px;font-size:0.95rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:0.5rem}
+  .save-btn:hover{background:var(--vert-fonce)}
+  .save-btn:disabled{opacity:0.6;cursor:not-allowed}
+  .save-msg{font-size:0.85rem;font-weight:600;display:none}
+  .save-msg.ok{color:var(--vert)}
+  .save-msg.err{color:var(--rouge)}
+
+  /* EVENTS */
+  .event-card{border:1px solid #E8E5DC;border-radius:10px;padding:1.25rem;margin-bottom:1rem;background:#FDFCF8}
+  .event-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+  .event-num{font-weight:600;font-size:0.9rem;color:var(--gris)}
+  .del-btn{background:none;border:none;color:var(--rouge);cursor:pointer;font-size:0.85rem;font-weight:600;padding:0.25rem 0.6rem;border-radius:4px;transition:background 0.2s}
+  .del-btn:hover{background:#FFF0F1}
+  .add-event-btn{width:100%;padding:0.85rem;border:2px dashed rgba(0,107,63,0.3);border-radius:10px;background:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;color:var(--vert);cursor:pointer;transition:all 0.2s;margin-top:0.5rem}
+  .add-event-btn:hover{background:var(--vert-pale);border-color:var(--vert)}
+
+  /* PHOTOS */
+  .upload-drop{border:2px dashed rgba(0,107,63,0.3);border-radius:14px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all 0.2s;background:#fff;margin-bottom:1.5rem}
+  .upload-drop:hover,.upload-drop.dragover{border-color:var(--vert);background:var(--vert-pale)}
+  .upload-icon{font-size:3rem;margin-bottom:1rem}
+  .upload-title{font-weight:600;font-size:1.05rem;margin-bottom:0.4rem}
+  .upload-hint{color:var(--gris);font-size:0.85rem}
+  .upload-progress-bar{height:6px;background:#E8E5DC;border-radius:10px;overflow:hidden;margin:1rem 0;display:none}
+  .upload-progress-fill{height:100%;background:var(--vert);border-radius:10px;transition:width 0.3s;width:0}
+  .upload-status{text-align:center;font-size:0.9rem;font-weight:600;color:var(--vert);display:none}
+  .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .photo-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#eee}
+  .photo-item img{width:100%;height:100%;object-fit:cover}
+  .photo-item .photo-del{position:absolute;top:6px;right:6px;background:rgba(208,18,33,0.9);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.15s}
+  .photo-item .photo-del:hover{transform:scale(1.1)}
+  .photo-caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));color:#fff;font-size:0.72rem;padding:1rem 0.5rem 0.4rem;text-align:center}
+  .no-photos{text-align:center;padding:3rem;color:var(--gris);font-style:italic}
+
+  /* NOTICE */
+  .notice{padding:1rem 1.25rem;border-radius:10px;font-size:0.875rem;line-height:1.6;margin-bottom:1.5rem;display:flex;gap:0.75rem}
+  .notice.info{background:#EEF3FF;border:1px solid #C5D0FF;color:#2D3EAA}
+  .notice.success{background:var(--vert-pale);border:1px solid rgba(0,107,63,0.25);color:var(--vert-fonce)}
+  .notice-icon{font-size:1.1rem;flex-shrink:0;margin-top:0.1rem}
+
+  /* LOADING */
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media(max-width:768px){
+    .admin-body{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .field-row,.field-3{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== ÉCRAN DE CONNEXION ===== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-flag"><div class="f1"></div><div class="f2"></div><div class="f3"></div></div>
+    <div class="login-logo">ATN</div>
+    <p class="login-sub">Espace Chargé de Communication<br>Connectez-vous avec votre compte autorisé</p>
+    <div class="login-field">
+      <label>Adresse email</label>
+      <input type="email" id="login-email" placeholder="prenom@atn-nancy.fr" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pwd" placeholder="••••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Se connecter</button>
+    <div class="login-err" id="login-err"></div>
+    <p style="text-align:center;font-size:0.78rem;color:var(--gris);margin-top:1.5rem">Accès réservé aux chargés de com de l'ATN.<br>Pour obtenir un accès, contactez l'administrateur.</p>
+  </div>
+</div>
+
+<!-- ===== INTERFACE ADMIN ===== -->
+<div id="admin-screen">
+  <div class="admin-header">
+    <div class="admin-logo">AT<span>N</span> <span style="color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:400">— Admin</span></div>
+    <div class="header-right">
+      <div class="user-badge">Connecté : <strong id="user-email"></strong></div>
+      <a href="index.html" target="_blank" class="view-site-btn">👁 Voir le site</a>
+      <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Contenu</div>
+        <button class="sidebar-btn active" onclick="showTab('accueil')"><span class="icon">🏠</span>Page d'accueil</button>
+        <button class="sidebar-btn" onclick="showTab('apropos')"><span class="icon">👥</span>À propos</button>
+        <button class="sidebar-btn" onclick="showTab('agenda')"><span class="icon">📅</span>Agenda</button>
+        <button class="sidebar-btn" onclick="showTab('photos')"><span class="icon">📸</span>Galerie photos</button>
+      </div>
+      <div class="sidebar-section" style="margin-top:1rem">
+        <div class="sidebar-label">Paramètres</div>
+        <button class="sidebar-btn" onclick="showTab('contact')"><span class="icon">📧</span>Contact & liens</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+      <!-- ACCUEIL -->
+      <div class="tab-panel active" id="tab-accueil">
+        <div class="page-title">🏠 Page d'accueil</div>
+        <p class="page-sub">Modifiez les textes affichés sur la bannière principale du site.</p>
+        <div class="form-card">
+          <div class="form-card-title">✏️ Textes de la bannière</div>
+          <div class="field"><label>Accroche (bandeau jaune en haut)</label><input type="text" id="e-tag" placeholder="🇹🇬 Lomé à Nancy, notre cœur bat pour deux pays"></div>
+          <div class="field"><label>Sous-titre de présentation</label><textarea id="e-sub" rows="3" placeholder="Depuis des années, l'ATN rassemble..."></textarea></div>
+          <div class="save-bar">
+            <button class="save-btn" onclick="saveSection('accueil')">💾 Publier les modifications</button>
+            <span class="save-msg" id="msg-accueil"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- APROPOS -->
+      <div class="tab-panel" id="tab-apropos">
+        <div class="page-title">👥 À propos</div>
+        <p class="page-sub">Modifiez la présentation de l'association et les chiffres clés.</p>
+        <div class="form-card">
+          <div class="form-card-title">📝 Description</div>
+          <div class="field"><label>Paragraphe 1</label><textarea id="e-p1" rows="3"></textarea></div>
+          <div class="field"><label>Paragraphe 2</label><textarea id="e-p2" rows="3"></textarea></div>
+          <div class="field"><label>Paragraphe 3</label><textarea id="e-p3" rows="3"></textarea></div>
+        </div>
+        <div class="form-card">
+          <div class="form-card-title">📊 Chiffres clés</div>
+          <div class="field-3">
+            <div class="field"><label>Nombre de membres</label><input type="text" id="e-s1" placeholder="200+"></div>
+            <div class="field"><label>Événements par an</label><input type="text" id="e-s2" placeholder="15+"></div>
+            <div class="field"><label>Années d'existence</label><input type="text" id="e-s3" placeholder="20+"></div>
+          </div>
+        </div>
+        <div class="save-bar">
+          <button class="save-btn" onclick="saveSection('apropos')">💾 Publier les modifications</button>
+          <span class="save-msg" id="msg-apropos"></span>
+        </div>
+      </div>
+
+      <!-- AGENDA -->
+      <div class="tab-panel" id="tab-agenda">
+        <div class="page-title">📅 Agenda</div>
+        <p class="page-sub">Ajoutez, modifiez ou supprimez les événements à venir sur le site.</p>
+        <div class="notice info"><span class="notice-icon">💡</span><span>Les modifications sont publiées immédiatement sur le site public après sauvegarde.</span></div>
+        <div id="events-editor"></div>
+        <button class="add-event-btn" onclick="addEvent()">+ Ajouter un événement</button>
+        <div class="save-bar" style="margin-top:1.5rem">
+          <button class="save-btn" onclick="saveSection('agenda')">💾 Publier l'agenda</button>
+          <span class="save-msg" id="msg-agenda"></span>
+        </div>
+      </div>
+
+      <!-- PHOTOS -->
+      <div class="tab-panel" id="tab-photos">
+        <div class="page-title">📸 Galerie photos</div>
+        <p class="page-sub">Ajoutez des photos à la galerie. Elles s'affichent immédiatement sur le site.</p>
+        <div class="notice success"><span class="notice-icon">✅</span><span>Les photos sont stockées sur Firebase Storage (Google). Elles ne seront jamais perdues.</span></div>
+        <div class="upload-drop" id="upload-drop" onclick="document.getElementById('photo-file').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          <div class="upload-icon">📷</div>
+          <div class="upload-title">Cliquez ou glissez vos photos ici</div>
+          <p class="upload-hint">JPG, PNG, WEBP — plusieurs photos à la fois</p>
+          <input type="file" id="photo-file" accept="image/*" multiple style="display:none" onchange="startUpload(this.files)">
+        </div>
+        <div class="upload-progress-bar" id="progress-bar"><div class="upload-progress-fill" id="progress-fill"></div></div>
+        <div class="upload-status" id="upload-status"></div>
+        <div class="photos-grid" id="photos-grid"></div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="tab-panel" id="tab-contact">
+        <div class="page-title">📧 Contact & réseaux sociaux</div>
+        <p class="page-sub">Mettez à jour les informations de contact et les liens vers vos réseaux.</p>
+        <div class="form-card">
+          <div class="form-card-title">📬 Coordonnées</div>
+          <div class="field-row">
+            <div class="field"><label>Email de contact</label><input type="email" id="e-email" placeholder="Associationdestogolaisdenancya@gmail.com"></div>
+            <div class="field"><label>Ville affichée</label><input type="text" id="e-ville" placeholder="Nancy, Meurthe-et-Moselle (54)"></div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="form-card-title">🔗 Réseaux sociaux <span style="font-size:0.78rem;font-weight:400;color:var(--gris)">(laissez vide pour masquer le bouton)</span></div>
+          <div class="field"><label>📘 Facebook — URL de votre page</label><input type="url" id="e-fb" placeholder="https://facebook.com/votrepage"></div>
+          <div class="field"><label>📸 Instagram — URL du profil</label><input type="url" id="e-ig" placeholder="https://instagram.com/votrepage"></div>
+          <div class="field"><label>💬 WhatsApp — Lien d'invitation au groupe</label><input type="url" id="e-wa" placeholder="https://chat.whatsapp.com/..."></div>
+          <div class="field"><label>▶ YouTube — URL de la chaîne</label><input type="url" id="e-yt" placeholder="https://youtube.com/@votrepage"></div>
+        </div>
+        <div class="save-bar">
+          <button class="save-btn" onclick="saveSection('contact')">💾 Publier les modifications</button>
+          <span class="save-msg" id="msg-contact"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== AUTH ==========
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd = document.getElementById('login-pwd').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Connexion...';
+  try {
+    const { auth, signInWithEmailAndPassword } = window._fb;
+    await signInWithEmailAndPassword(auth, email, pwd);
+  } catch(e) {
+    err.style.display = 'block';
+    const msgs = {
+      'auth/user-not-found': 'Aucun compte avec cet email.',
+      'auth/wrong-password': 'Mot de passe incorrect.',
+      'auth/invalid-email': 'Email invalide.',
+      'auth/too-many-requests': 'Trop de tentatives. Réessayez dans quelques minutes.',
+      'auth/invalid-credential': 'Email ou mot de passe incorrect.',
+    };
+    err.textContent = msgs[e.code] || 'Erreur de connexion : ' + e.message;
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+  }
+}
+
+function doLogout() {
+  const { auth, signOut } = window._fb;
+  signOut(auth);
+}
+
+// ========== NAVIGATION ==========
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ========== DATA ==========
+let currentEvents = [];
+let currentData = {};
+
+async function loadData() {
+  const { db, ref, onValue } = window._fb;
+  onValue(ref(db, 'atn'), (snap) => {
+    const d = snap.val() || {};
+    currentData = d;
+    fillForms(d);
+    if (d.events) { currentEvents = d.events; renderEventsEditor(d.events); }
+    else renderEventsEditor([]);
+    if (d.photos) renderPhotosGrid(Object.values(d.photos));
+    else renderPhotosGrid([]);
+  });
+}
+
+function fillForms(d) {
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined) el.value = val; };
+  set('e-tag', d.tag); set('e-sub', d.sub);
+  set('e-p1', d.p1); set('e-p2', d.p2); set('e-p3', d.p3);
+  set('e-s1', d.s1); set('e-s2', d.s2); set('e-s3', d.s3);
+  set('e-email', d.email); set('e-ville', d.ville);
+  set('e-fb', d.fb); set('e-ig', d.ig); set('e-wa', d.wa); set('e-yt', d.yt);
+}
+
+async function saveSection(section) {
+  const btn = event.currentTarget;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Publication...';
+  const msgEl = document.getElementById('msg-' + section);
+  msgEl.style.display = 'none';
+
+  let patch = {};
+  if (section === 'accueil') {
+    patch = { tag: document.getElementById('e-tag').value, sub: document.getElementById('e-sub').value };
+  } else if (section === 'apropos') {
+    patch = { p1: document.getElementById('e-p1').value, p2: document.getElementById('e-p2').value, p3: document.getElementById('e-p3').value, s1: document.getElementById('e-s1').value, s2: document.getElementById('e-s2').value, s3: document.getElementById('e-s3').value };
+  } else if (section === 'agenda') {
+    patch = { events: currentEvents };
+  } else if (section === 'contact') {
+    patch = { email: document.getElementById('e-email').value, ville: document.getElementById('e-ville').value, fb: document.getElementById('e-fb').value, ig: document.getElementById('e-ig').value, wa: document.getElementById('e-wa').value, yt: document.getElementById('e-yt').value };
+  }
+
+  try {
+    const { db, ref, set } = window._fb;
+    await set(ref(db, 'atn'), { ...currentData, ...patch });
+    msgEl.textContent = '✅ Publié avec succès !'; msgEl.className = 'save-msg ok'; msgEl.style.display = 'inline';
+    setTimeout(() => msgEl.style.display = 'none', 3000);
+  } catch(e) {
+    msgEl.textContent = '❌ Erreur : ' + e.message; msgEl.className = 'save-msg err'; msgEl.style.display = 'inline';
+  }
+  btn.disabled = false; btn.innerHTML = '💾 Publier les modifications';
+  if (section === 'agenda') btn.innerHTML = '💾 Publier l\'agenda';
+}
+
+// ========== EVENTS ==========
+function renderEventsEditor(events) {
+  currentEvents = JSON.parse(JSON.stringify(events));
+  const c = document.getElementById('events-editor');
+  if (!events.length) { c.innerHTML = '<p style="color:var(--gris);font-style:italic;margin-bottom:1rem">Aucun événement. Cliquez sur + pour en ajouter.</p>'; return; }
+  c.innerHTML = events.map((ev, i) => `
+    <div class="event-card">
+      <div class="event-card-header">
+        <span class="event-num">Événement ${i+1}</span>
+        <button class="del-btn" onclick="deleteEvent(${i})">🗑 Supprimer</button>
+      </div>
+      <div class="field-row" style="margin-bottom:1rem">
+        <div class="field" style="margin:0"><label>Jour</label><input type="text" value="${ev.day}" onchange="currentEvents[${i}].day=this.value" maxlength="2" placeholder="14"></div>
+        <div class="field" style="margin:0"><label>Mois</label><input type="text" value="${ev.month}" onchange="currentEvents[${i}].month=this.value" maxlength="5" placeholder="Juin"></div>
+      </div>
+      <div class="field"><label>Nom de l'événement</label><input type="text" value="${ev.name}" onchange="currentEvents[${i}].name=this.value"></div>
+      <div class="field-row">
+        <div class="field" style="margin:0"><label>Lieu</label><input type="text" value="${ev.location}" onchange="currentEvents[${i}].location=this.value"></div>
+        <div class="field" style="margin:0"><label>Catégorie</label>
+          <select onchange="updateBadge(${i},this.value)">
+            <option value="culture" ${ev.badge==='culture'?'selected':''}>🎶 Culture</option>
+            <option value="sport" ${ev.badge==='sport'?'selected':''}>⚽ Sport</option>
+            <option value="social" ${ev.badge==='social'?'selected':''}>🍖 Social</option>
+            <option value="solidarité" ${ev.badge==='solidarité'?'selected':''}>🤝 Solidarité</option>
+          </select>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateBadge(i, val) {
+  currentEvents[i].badge = val;
+  const m = {culture:'badge-culture',sport:'badge-sport',social:'badge-social','solidarité':'badge-solidarite'};
+  currentEvents[i].badgeClass = m[val] || 'badge-solidarite';
+}
+function addEvent() {
+  currentEvents.push({day:'01',month:'Jan',name:'Nouvel événement',location:'Nancy',badge:'culture',badgeClass:'badge-culture'});
+  renderEventsEditor(currentEvents);
+}
+function deleteEvent(i) { if(confirm('Supprimer cet événement ?')){ currentEvents.splice(i,1); renderEventsEditor(currentEvents); } }
+
+// ========== PHOTOS ==========
+async function startUpload(files) {
+  if(!files||!files.length) return;
+  const bar = document.getElementById('progress-bar');
+  const fill = document.getElementById('progress-fill');
+  const status = document.getElementById('upload-status');
+  bar.style.display = 'block'; status.style.display = 'block';
+
+  for(let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const pct = Math.round((i / files.length) * 100);
+    fill.style.width = pct + '%';
+    status.textContent = `⏳ Upload ${i+1}/${files.length} — ${file.name}`;
+    const id = 'photo_' + Date.now() + '_' + i;
+    const path = `atn-photos/${id}`;
+    try {
+      const { storage, sRef, uploadBytes, getDownloadURL, db, ref, set } = window._fb;
+      const snap = await uploadBytes(sRef(storage, path), file);
+      const url = await getDownloadURL(snap.ref);
+      const caption = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+      await set(ref(db, `atn/photos/${id}`), { id, url, path, caption, date: new Date().toISOString() });
+    } catch(e) { status.textContent = '❌ Erreur : ' + e.message; }
+  }
+  fill.style.width = '100%';
+  status.textContent = `✅ ${files.length} photo(s) ajoutée(s) avec succès !`;
+  setTimeout(() => { bar.style.display='none'; status.style.display='none'; fill.style.width='0'; }, 3000);
+  document.getElementById('photo-file').value = '';
+}
+
+function renderPhotosGrid(photos) {
+  const g = document.getElementById('photos-grid');
+  if(!photos.length){ g.innerHTML='<p class="no-photos">Aucune photo pour le moment. Ajoutez-en ci-dessus !</p>'; return; }
+  g.innerHTML = photos.map(p => `
+    <div class="photo-item">
+      <img src="${p.url}" alt="${p.caption||''}" loading="lazy">
+      <button class="photo-del" onclick="deletePhoto('${p.id}','${p.path||''}')">✕</button>
+      <div class="photo-caption">${p.caption||''}</div>
+    </div>`).join('');
+}
+
+async function deletePhoto(id, path) {
+  if(!confirm('Supprimer cette photo ?')) return;
+  try {
+    const { db, ref, set, storage, sRef, deleteObject } = window._fb;
+    await set(ref(db, `atn/photos/${id}`), null);
+    if(path) await deleteObject(sRef(storage, path)).catch(()=>{});
+  } catch(e) { alert('Erreur : ' + e.message); }
+}
+
+// Drag & drop
+function onDragOver(e) { e.preventDefault(); document.getElementById('upload-drop').classList.add('dragover'); }
+function onDragLeave() { document.getElementById('upload-drop').classList.remove('dragover'); }
+function onDrop(e) { e.preventDefault(); onDragLeave(); startUpload(e.dataTransfer.files); }
+</script>
+</body>
+</html>
